@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx-server
+    ports:
+      - "8554:8554"  # RTSP
+      - "1935:1935"  # RTMP
+      - "8888:8888"  # HLS
+      - "8889:8889"  # WebRTC
+      - "9997:9997"  # API
+      - "9998:9998"  # Metrics
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
+      - ./recordings:/recordings
+    environment:
+      - MTX_PROTOCOLS=tcp
+    restart: unless-stopped
+    networks:
+      - mediamtx-network
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mediamtx-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997
+    depends_on:
+      - mediamtx
+    restart: unless-stopped
+    networks:
+      - mediamtx-network
+
+networks:
+  mediamtx-network:
+    driver: bridge
+
+volumes:
+  recordings:
+    driver: local
