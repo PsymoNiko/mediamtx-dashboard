@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx-server
+    ports:
+      - "8554:8554"
+      - "1935:1935"
+      - "8888:8888"
+      - "8889:8889"
+      - "9997:9997"
+      - "9998:9998"
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
+      - recordings:/recordings
+    environment:
+      - MTX_PROTOCOLS=tcp
+    restart: always
+    networks:
+      - mediamtx-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9997/v3/config/global/get"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.debian
+      args:
+        - NODE_ENV=production
+    container_name: mediamtx-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997
+      - NODE_ENV=production
+    depends_on:
+      mediamtx:
+        condition: service_healthy
+    restart: always
+    networks:
+      - mediamtx-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  mediamtx-network:
+    driver: bridge
+
+volumes:
+  recordings:
+    driver: local
