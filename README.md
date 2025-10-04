@@ -1,39 +1,93 @@
-# Mediamtx config
-
-## Overview
-
-
-## Deployment
-
-Your project is live at:
-
-
-## Build your app
-
-Continue building your app on:
-
-
-## Docker Deployment
-
-This project can be easily deployed using Docker. See [DOCKER.md](DOCKER.md) for detailed instructions.
-
-### Quick Start with Docker
-
-\`\`\`bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-\`\`\`
-
-Access the dashboard at http://localhost:3000 and MediaMTX at http://localhost:9997.
-
-For advanced configuration and production deployment, see the [Docker Deployment Guide](DOCKER.md).
-
-## How It Works
-
 # mediamtx-dashboard
+
+A modern dashboard project leveraging the latest web technologies to provide a robust and flexible interface for managing media streaming with MediaMTX.
+
+## Technologies Used
+
+- **TypeScript** (79%): Strongly-typed JavaScript for scalable application development.
+- **Shell** (10.1%): Used for scripting automation and deployment.
+- **CSS** (7.3%): For custom styling and layouts.
+- **Makefile** (2.3%): For build and automation tasks.
+- **Other** (1.3%): Additional supporting scripts and configuration.
+
+The project structure and files indicate usage of:
+- **Next.js** (evident from `next.config.mjs`), a React-based framework for SSR and SSG.
+- **pnpm** (see `PNPM.md`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`) as the package manager.
+- **Docker** (multiple Dockerfiles and Compose files) for containerized development and deployment.
+- **PostCSS** (via `postcss.config.mjs`) for advanced CSS processing.
+
+## Concept
+
+The dashboard is designed to simplify the management and monitoring of MediaMTX-based streaming infrastructure. It provides an intuitive interface, real-time updates, and modular components for extensibility. The architecture supports both local development and production deployments using Docker and pnpm workspaces.
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** (recommended LTS version)
+- **pnpm**: Install via `npm install -g pnpm`
+- **Docker** (for containerized workflows)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PsymoNiko/mediamtx-dashboard.git
+   cd mediamtx-dashboard
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+### Running the Project
+
+#### Local Development
+
+```bash
+pnpm dev
+```
+
+Or, using Docker Compose for a local containerized environment:
+
+```bash
+docker-compose -f docker-compose.local.yml up --build
+```
+
+#### Production
+
+Build and run with Docker Compose:
+
+```bash
+docker-compose -f docker-compose.prod.yml up --build
+```
+
+Or, use the provided Dockerfiles for different environments (`Dockerfile`, `Dockerfile.dev`, `Dockerfile.simple`, `Dockerfile.debian`).
+
+#### Using Makefile
+
+For advanced build or automation tasks, refer to the `Makefile`:
+
+```bash
+make <target>
+```
+
+### Additional Documentation
+
+- See `PNPM.md` for pnpm workspace and monorepo management.
+- See `DOCKER.md` for detailed Docker usage instructions.
+
+## Project Structure
+
+- `app/`, `components/`, `lib/`, `public/`, `styles/` — Main application, UI, and assets.
+- Multiple Dockerfiles and Compose files for flexible deployment.
+- `Makefile` for task automation and builds.
+
+## License
+
+No license information is currently provided. Please check with the repository owner for usage guidelines.
+
+---
+
+For more details, visit the [GitHub repository](https://github.com/PsymoNiko/mediamtx-dashboard).
