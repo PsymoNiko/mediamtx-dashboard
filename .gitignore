@@ -1,0 +1,11 @@
+.idea
+venv
+.env
+mediamtx3.yml
+mediamtx_updater.log
+mediamtx_updater3.py
+__pycache__/
+.vscode
+.qodo
+.next
+next-env.d.ts

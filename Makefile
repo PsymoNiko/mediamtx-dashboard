@@ -1,15 +1,28 @@
-.PHONY: help pnpm-setup pnpm-build pnpm-dev pnpm-clean
+# -------------------------------------------------
+# Variables
+# -------------------------------------------------
+# Default value; can be overridden on the command line:
+#   make pnpm-dev LOCALHOST=127.0.0.1
+LOCALHOST ?= localhost
 
+# -------------------------------------------------
+# Help
+# -------------------------------------------------
+.PHONY: help
 help: ## Show this help message
-	@echo 'Usage: make [target]'
+	@echo 'Usage: make [target] [VARIABLE=value]'
 	@echo ''
 	@echo 'Available targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-25s %s\n", $1, $2}' $(MAKEFILE_LIST)
 
-# pnpm-specific commands
+# -------------------------------------------------
+# pnpm‑specific commands
+# -------------------------------------------------
+.PHONY: pnpm-install pnpm-setup pnpm-test pnpm-build pnpm-build-dev pnpm-dev pnpm-clean
+
 pnpm-install: ## Install pnpm globally
 	npm install -g pnpm
-	@echo "✅ pnpm installed: $$(pnpm --version)"
+	@echo "✅ pnpm installed: $(pnpm --version)"
 
 pnpm-setup: ## Setup pnpm environment
 	chmod +x scripts/setup-pnpm.sh scripts/pnpm-docker.sh
@@ -26,14 +39,20 @@ pnpm-build: ## Build Docker image with pnpm
 pnpm-build-dev: ## Build development image with pnpm
 	docker-compose -f docker-compose.dev.yml build --no-cache
 
-pnpm-dev: ## Start in development mode with hot-reload
+pnpm-dev: export LOCALHOST=$(LOCALHOST) ## Start in development mode with hot‑reload
+	@echo "🚀 Running with LOCALHOST=$(LOCALHOST)"
 	docker-compose -f docker-compose.dev.yml up
 
 pnpm-clean: ## Clean pnpm cache and lockfile
 	rm -rf node_modules .next pnpm-lock.yaml
 	pnpm store prune || true
 
+# -------------------------------------------------
 # Standard Docker commands
+# -------------------------------------------------
+.PHONY: build up down restart logs logs-dashboard logs-mediamtx clean rebuild dev \
+        shell-dashboard shell-mediamtx ps health status
+
 build: pnpm-setup pnpm-build ## Build production images
 
 up: ## Start all services
