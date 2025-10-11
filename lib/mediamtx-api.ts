@@ -1,6 +1,6 @@
 import { getAuthHeader } from "./auth"
 
-const API_URL = process.env.NEXT_PUBLIC_MEDIAMTX_API_URL || "http://localhost:9997"
+const API_URL = process.env.NEXT_PUBLIC_MEDIAMTX_API_URL || "http://192.168.50.15:9997"
 
 export interface PathConfig {
   name: string
@@ -53,12 +53,31 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     },
   })
 
+  const contentType = response.headers.get("content-type") || ""
+
   if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || `API request failed: ${response.statusText}`)
+    let errorText = ""
+    try {
+      errorText = await response.text()
+    } catch {}
+    throw new Error(errorText || `API request failed: ${response.status} ${response.statusText}`)
   }
 
-  return response.json()
+  if (response.status === 204) return null
+
+  // Some MediaMTX endpoints return an empty body on success; avoid JSON parse errors
+  const text = await response.text()
+  if (!text) return null
+
+  if (contentType.includes("application/json")) {
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      throw new Error("Invalid JSON in response")
+    }
+  }
+
+  return text
 }
 
 export async function getPathConfigs(): Promise<PathConfig[]> {
