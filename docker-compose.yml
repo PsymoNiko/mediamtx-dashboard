@@ -69,7 +69,6 @@ services:
       - "8181:8080"
     volumes:
       - ./openapi.yaml:/spec/openapi.yaml
-      - ./swagger-config.json:/usr/share/nginx/html/swagger-config.json
     environment:
       - SWAGGER_JSON=/spec/openapi.yaml
     networks:
