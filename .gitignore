@@ -9,3 +9,4 @@ __pycache__/
 .qodo
 .next
 next-env.d.ts
+node_modules/
