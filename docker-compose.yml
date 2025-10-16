@@ -13,7 +13,6 @@ services:
       - MTX_RTSPTRANSPORTS=tcp
       - MTX_WEBRTCADDITIONALHOSTS=${MTX_WEBRTCADDITIONALHOSTS:-localhost}
       - MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
-
     ports:
       - "9998:9998"
       - "9999:9999"
@@ -29,11 +28,9 @@ services:
     networks:
       - mediamtx_network
 
-
-
   dashboard:
-      context: .
-      dockerfile: Dockerfile
+    context: .
+    dockerfile: Dockerfile
     container_name: mediamtx-dashboard
     ports:
       - "3000:3000"
@@ -74,9 +71,6 @@ services:
     networks:
       - mediamtx_network
 
-
-
 networks:
   mediamtx_network:
     name: mediamtx_network
-
