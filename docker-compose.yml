@@ -29,8 +29,9 @@ services:
       - mediamtx_network
 
   dashboard:
-    context: .
-    dockerfile: Dockerfile
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: mediamtx-dashboard
     ports:
       - "3000:3000"
