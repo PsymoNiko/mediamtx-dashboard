@@ -11,7 +11,7 @@ services:
       - .env
     environment:
       - MTX_RTSPTRANSPORTS=tcp
-      - MTX_WEBRTCADDITIONALHOSTS="176.97.218.253"
+      - MTX_WEBRTCADDITIONALHOSTS="localhost"
         #- MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
     ports:
       - "9998:9998"
