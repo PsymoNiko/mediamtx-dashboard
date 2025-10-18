@@ -11,8 +11,8 @@ services:
       - .env
     environment:
       - MTX_RTSPTRANSPORTS=tcp
-      - MTX_WEBRTCADDITIONALHOSTS=${MTX_WEBRTCADDITIONALHOSTS:-localhost}
-      - MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
+      - MTX_WEBRTCADDITIONALHOSTS="176.97.218.253"
+        #- MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
     ports:
       - "9998:9998"
       - "9999:9999"
@@ -50,7 +50,7 @@ services:
     container_name: nginx_mediamtx_proxy
     restart: unless-stopped
     ports:
-      - "85:80"
+      - "80:80"
       - "554:554"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Nginx config file
