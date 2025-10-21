@@ -1,0 +1,3 @@
+## This Config is a sample configuration to setup a general mediamtx configuration....
+
+[Public Configuration](public.yml)
