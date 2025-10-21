@@ -11,9 +11,8 @@ services:
       - .env
     environment:
       - MTX_RTSPTRANSPORTS=tcp
-      - MTX_WEBRTCADDITIONALHOSTS=${MTX_WEBRTCADDITIONALHOSTS:-localhost}
-      - MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
-
+      - MTX_WEBRTCADDITIONALHOSTS="localhost"
+        #- MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
     ports:
       - "9998:9998"
       - "9999:9999"
@@ -29,9 +28,8 @@ services:
     networks:
       - mediamtx_network
 
-
-
   dashboard:
+    build: 
       context: .
       dockerfile: Dockerfile
     container_name: mediamtx-dashboard
@@ -52,7 +50,7 @@ services:
     container_name: nginx_mediamtx_proxy
     restart: unless-stopped
     ports:
-      - "85:80"
+      - "80:80"
       - "554:554"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Nginx config file
@@ -74,9 +72,6 @@ services:
     networks:
       - mediamtx_network
 
-
-
 networks:
   mediamtx_network:
     name: mediamtx_network
-
