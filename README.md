@@ -68,9 +68,21 @@ pnpm dev
 ```
 
 Or, using Docker Compose for a local containerized environment:
+* PS: If you want to run the dashboard on `pnpm` as in local, replace this config in `.env.local`
+
 
 ```bash
-docker-compose -f docker-compose.local.yml up --build
+NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost:9997
+NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost:8888
+MTX_WEBRTCADDITIONALHOSTS="localhost"
+```
+
+```bash
+
+docker-compose up publisher -d
+
+pnpm run build
+pnpm run dev
 ```
 
 #### Production
