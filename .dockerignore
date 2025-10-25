@@ -1,0 +1,17 @@
+node_modules
+.pnpm-store
+.pnpm
+.next
+.next/cache
+.DS_Store
+.git
+.gitignore
+docker-compose*.yml
+Dockerfile*
+.env
+coverage
+dist
+build
+npm-debug.log
+pnpm-debug.log
+venv/
