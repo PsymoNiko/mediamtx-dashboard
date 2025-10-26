@@ -1,6 +1,6 @@
 import { getAuthHeader } from "./auth"
 
-const API_URL = process.env.NEXT_PUBLIC_MEDIAMTX_API_URL || "http://localhost:9997"
+const API_URL = process.env.NEXT_PUBLIC_MEDIAMTX_API_URL
 
 export interface PathConfig {
   name: string
