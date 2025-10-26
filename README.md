@@ -1,10 +1,3 @@
-<h1 align="center">
-  <a href="https://mediamtx.org">
-    <img src="logo.png" alt="MediaMTX">
-  </a>
-
-  <br>
-  <br>
 
  
 
@@ -93,6 +86,16 @@
     <animate attributeName="opacity" from="0" to="1" dur="0.9s" begin="0s" fill="freeze"/>
   </g>
 </svg>
+
+
+
+<h1 align="center">
+  <a href="https://mediamtx.org">
+    <img src="logo.png" alt="MediaMTX">
+  </a>
+
+  <br>
+  <br>
 
  [![Website](https://img.shields.io/badge/website-mediamtx.org-1c94b5)](https://mediamtx.org)
   [![Test](https://github.com/bluenviron/mediamtx/actions/workflows/code_test.yml/badge.svg)](https://github.com/bluenviron/mediamtx/actions/workflows/code_test.yml)
