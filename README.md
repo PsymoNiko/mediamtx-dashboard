@@ -3,7 +3,7 @@
 
 <h1 align="center">
   <a href="https://mediamtx.org">
-    <img src="logo.png" alt="MediaMTX">
+    <img src="Dashboard_Logo.jpg" alt="MediaMTX">
   </a>
 
   <br>
