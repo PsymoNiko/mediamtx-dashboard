@@ -60,8 +60,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./mediamtx.yml:/mediamtx.yml:ro
-    env_file:
-      - .env
     environment:
       - MTX_RTSPTRANSPORTS=tcp
       - MTX_WEBRTCADDITIONALHOSTS="localhost"
@@ -82,9 +80,13 @@ services:
       - mediamtx_network
 
   dashboard:
-    build: 
+    image: mediamtx-dashboard:latest
+    build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL}
+        NEXT_PUBLIC_MEDIAMTX_HLS_URL: ${NEXT_PUBLIC_MEDIAMTX_HLS_URL}
     container_name: mediamtx-dashboard
     ports:
       - "3000:3000"
@@ -92,7 +94,7 @@ services:
       - publisher
     restart: unless-stopped
     env_file:
-      - .env
+      - ./.env
     networks:
       - mediamtx_network
 
@@ -109,9 +111,9 @@ services:
     depends_on:
       - publisher
       - dashboard
-      - grafana_mediamtx
-      - prometheus_mediamtx
-      - node-exporter_mediamtx
+        # - grafana_mediamtx
+        # - prometheus_mediamtx
+        # - node-exporter_mediamtx
     networks:
       - mediamtx_network
 

@@ -9,6 +9,7 @@ node_modules
 docker-compose*.yml
 Dockerfile*
 .env
+.env.local
 coverage
 dist
 build
