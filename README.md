@@ -6,7 +6,95 @@
   <br>
   <br>
 
-  [![Website](https://img.shields.io/badge/website-mediamtx.org-1c94b5)](https://mediamtx.org)
+ 
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="MediaMTX Dashboard animated logo">
+  <defs>
+    <!-- Gradient matching the logo: blue -> cyan -->
+    <linearGradient id="blueCyan" x1="0%" x2="100%" y1="0%" y2="0%">
+      <stop id="s1" offset="0%" stop-color="#1666C6"/>
+      <stop id="s2" offset="100%" stop-color="#13A8C8"/>
+      <!-- animate gradient travel -->
+      <animate xlink:href="#s1" attributeName="offset" values="0%;10%;0%" dur="3.5s" repeatCount="indefinite" />
+      <animate xlink:href="#s2" attributeName="offset" values="100%;90%;100%" dur="3.5s" repeatCount="indefinite" />
+    </linearGradient>
+
+    <!-- Slight drop shadow filter for depth -->
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Reusable wifi arcs shape -->
+    <g id="wifiShape">
+      <path d="M0 0 C10 0 16 8 16 18" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <!-- Background (transparent) but black-friendly if displayed on dark background -->
+  <rect width="100%" height="100%" fill="transparent"/>
+
+  <!-- Main text group -->
+  <g transform="translate(60,0)">
+    <!-- MEDIAMTX -->
+    <text x="540" y="140" text-anchor="middle"
+          font-family="Montserrat, Arial, Helvetica, sans-serif"
+          font-weight="800" font-size="140" letter-spacing="2"
+          filter="url(#softShadow)"
+          fill="url(#blueCyan)">
+      MEDIAMTX
+    </text>
+
+    <!-- DASHBOARD (smaller, subtle pulse) -->
+    <g transform="translate(0,0)">
+      <text id="subtitle" x="540" y="260" text-anchor="middle"
+            font-family="Montserrat, Arial, Helvetica, sans-serif"
+            font-weight="700" font-size="90" letter-spacing="3"
+            fill="url(#blueCyan)">
+        DASHBOARD
+      </text>
+
+      <!-- subtitle pulse -->
+      <animateTransform xlink:href="#subtitle"
+                        attributeName="transform"
+                        type="scale"
+                        values="1;1.03;1"
+                        dur="3.6s"
+                        repeatCount="indefinite"
+                        additive="replace"
+                        />
+      <!-- subtle fade in/out to make it lively -->
+      <animate xlink:href="#subtitle"
+               attributeName="opacity"
+               values="0.95;1;0.95"
+               dur="3.6s"
+               repeatCount="indefinite" />
+    </g>
+  </g>
+
+  <!-- Wi-Fi icon at top-right of the word mark (animated 'wave' opacity) -->
+  <g transform="translate(983,38) scale(1.3)">
+    <!-- three arcs with staggered animation -->
+    <path d="M10 86 C30 50 70 50 90 86" stroke="url(#blueCyan)" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.95">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.4s" repeatCount="indefinite" />
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="2.4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M20 60 C40 36 60 36 80 60" stroke="url(#blueCyan)" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.9">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2.6s" begin="0.2s" repeatCount="indefinite" />
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" dur="2.6s" begin="0.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M32 36 C50 18 70 18 88 36" stroke="url(#blueCyan)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.85">
+      <animate attributeName="opacity" values="0.45;1;0.45" dur="2.8s" begin="0.4s" repeatCount="indefinite" />
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="2.8s" begin="0.4s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Optional tiny entrance animation for whole logo (a light rise + fade-in) -->
+  <g id="whole" opacity="0">
+    <animate attributeName="opacity" from="0" to="1" dur="0.9s" begin="0s" fill="freeze"/>
+  </g>
+</svg>
+
+ [![Website](https://img.shields.io/badge/website-mediamtx.org-1c94b5)](https://mediamtx.org)
   [![Test](https://github.com/bluenviron/mediamtx/actions/workflows/code_test.yml/badge.svg)](https://github.com/bluenviron/mediamtx/actions/workflows/code_test.yml)
   [![Lint](https://github.com/bluenviron/mediamtx/actions/workflows/code_lint.yml/badge.svg)](https://github.com/bluenviron/mediamtx/actions/workflows/code_lint.yml)
   [![CodeCov](https://codecov.io/gh/bluenviron/mediamtx/branch/main/graph/badge.svg)](https://app.codecov.io/gh/bluenviron/mediamtx/tree/main)
