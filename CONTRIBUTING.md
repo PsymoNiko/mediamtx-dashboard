@@ -1,9 +1,3 @@
-That's a great next step for your project\! Establishing clear guidelines helps encourage smooth and effective contributions.
-
-Here is a draft for your **`CONTRIBUTING.md`** file, tailored to the **mediamtx-dashboard** project structure (Next.js, TypeScript, Docker, pnpm):
-
------
-
 # 🤝 Contribution Guidelines
 
 We welcome and appreciate all contributions\! By participating in this project, you help us improve the MediaMTX dashboard for everyone.
