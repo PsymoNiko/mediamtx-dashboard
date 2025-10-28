@@ -102,7 +102,7 @@ The project includes pre-configured tools for code consistency. Before submittin
 
 ### 🐞 Reporting Bugs
 
-If you find a bug, please check the [Issues](https://www.google.com/search?q=https://github.com/PsymoNiko/mediamtx-dashboard/issues) page to see if it has already been reported. If not, open a new issue with the following information:
+If you find a bug, please check the [Issues](https://github.com/PsymoNiko/mediamtx-dashboard/issues) page to see if it has already been reported. If not, open a new issue with the following information:
 
   * A **clear and descriptive title**.
   * The **steps to reproduce** the issue.
