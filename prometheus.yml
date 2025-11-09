@@ -11,3 +11,8 @@ scrape_configs:
     static_configs:
       - targets:
           - 'node-exporter_mediamtx:9100'
+
+  - job_name: mediamtx
+    static_configs:
+      - targets:
+          - 'publisher:9998'

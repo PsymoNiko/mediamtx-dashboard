@@ -4,6 +4,6 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus_infra:9090
+    url: http://prometheus_mediamtx:9090
     isDefault: true
     editable: true

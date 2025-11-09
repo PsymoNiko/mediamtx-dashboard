@@ -150,7 +150,7 @@ apiTrustedProxies: []
 # Global settings -> Metrics
 
 # Enable Prometheus-compatible metrics.
-metrics: no
+metrics: yes
 # Address of the metrics HTTP listener.
 metricsAddress: :9998
 # Enable TLS/HTTPS on the Metrics server.
