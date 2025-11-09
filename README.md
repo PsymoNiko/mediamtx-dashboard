@@ -103,6 +103,17 @@ make <target>
 
 - See `PNPM.md` for pnpm workspace and monorepo management.
 - See `DOCKER.md` for detailed Docker usage instructions.
+- See `MONITORING.md` for monitoring setup with Prometheus and Grafana.
+
+## Monitoring
+
+The project includes a comprehensive monitoring stack with Prometheus, Grafana, and Node Exporter:
+
+- **Grafana Dashboard**: `http://localhost:3001` (admin/admin)
+- **Prometheus**: `http://localhost:9090`
+- **Pre-configured Dashboards**: MediaMTX metrics and system monitoring
+
+For detailed setup and configuration, see `MONITORING.md`.
 
 ## Project Structure
 
