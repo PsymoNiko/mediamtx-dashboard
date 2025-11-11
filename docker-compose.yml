@@ -48,6 +48,8 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
     depends_on:
       - prometheus_mediamtx
     networks:
@@ -111,9 +113,9 @@ services:
     depends_on:
       - publisher
       - dashboard
-        # - grafana_mediamtx
-        # - prometheus_mediamtx
-        # - node-exporter_mediamtx
+      - grafana_mediamtx
+      - prometheus_mediamtx
+      - node-exporter_mediamtx
     networks:
       - mediamtx_network
 
