@@ -150,7 +150,8 @@ cp .env.example .env
 
 Edit `.env` and set your values:
 ```env
-NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost/v3/config
+MEDIAMTX_API_URL=http://localhost:9997
+NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
 NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost/hls
 ```
 

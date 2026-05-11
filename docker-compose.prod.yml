@@ -36,7 +36,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997
+      - MEDIAMTX_API_URL=http://mediamtx:9997
+      - NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
       - NODE_ENV=production
     depends_on:
       mediamtx:
