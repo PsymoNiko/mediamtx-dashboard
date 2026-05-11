@@ -87,8 +87,8 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL}
-        NEXT_PUBLIC_MEDIAMTX_HLS_URL: ${NEXT_PUBLIC_MEDIAMTX_HLS_URL}
+        NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL:-http://localhost}
+        NEXT_PUBLIC_MEDIAMTX_HLS_URL: ${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost:8888}
     container_name: mediamtx-dashboard
     ports:
       - "3000:3000"

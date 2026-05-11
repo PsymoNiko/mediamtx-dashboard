@@ -32,11 +32,14 @@ services:
       dockerfile: Dockerfile.debian
       args:
         - NODE_ENV=production
+        - NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost
+        - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost:8888
     container_name: mediamtx-dashboard
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997
+      - NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost
+      - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost:8888
       - NODE_ENV=production
     depends_on:
       mediamtx:

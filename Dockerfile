@@ -97,7 +97,7 @@ COPY . .
 
 # Build args and envs (can be overridden at build time)
 ARG BUILD_NODE_ENV=production
-ARG NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"
+ARG NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost"
 ENV NEXT_PUBLIC_MEDIAMTX_API_URL=${NEXT_PUBLIC_MEDIAMTX_API_URL}
 ARG NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:80/hls"
 ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL}
@@ -116,7 +116,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Default runtime envs (these can be overridden at container runtime with -e or --env-file)
-ENV NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost"
 ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:80/hls"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

@@ -45,7 +45,7 @@ Create a `.env` file in the root directory to customize settings:
 \`\`\`env
 # Dashboard
 DASHBOARD_PORT=3000
-NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost:9997
+NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost
 
 # MediaMTX Ports
 RTSP_PORT=8554
