@@ -45,7 +45,8 @@ Create a `.env` file in the root directory to customize settings:
 \`\`\`env
 # Dashboard
 DASHBOARD_PORT=3000
-NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost:9997
+MEDIAMTX_API_URL=http://publisher:9997
+NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
 
 # MediaMTX Ports
 RTSP_PORT=8554
@@ -162,7 +163,8 @@ Create a `.env.production` file:
 
 \`\`\`env
 NODE_ENV=production
-NEXT_PUBLIC_MEDIAMTX_API_URL=https://your-domain.com/api
+MEDIAMTX_API_URL=http://mediamtx:9997
+NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
 \`\`\`
 
 ### 3. Use a reverse proxy (recommended)

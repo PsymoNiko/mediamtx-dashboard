@@ -11,7 +11,8 @@ Prerequisites
 
 Files
 - .env (runtime + build values)
-  - NEXT_PUBLIC_MEDIAMTX_API_URL=http://<host>:<port>/v3/config
+  - MEDIAMTX_API_URL=http://<host-or-compose-service>:9997
+  - NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
   - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://<host>:<port>/hls
   - Other runtime vars as needed
 - .env.local is ignored by builds (see .dockerignore) to prevent accidental overrides.
@@ -21,7 +22,7 @@ Build and Run
   docker compose --env-file .env up -d --build
 
 Update Config
-- Edit .env with new values for NEXT_PUBLIC_MEDIAMTX_API_URL / NEXT_PUBLIC_MEDIAMTX_HLS_URL
+- Edit .env with new values for MEDIAMTX_API_URL / NEXT_PUBLIC_MEDIAMTX_API_URL / NEXT_PUBLIC_MEDIAMTX_HLS_URL
 - Rebuild and restart:
   docker compose --env-file .env up -d --build
 
@@ -29,7 +30,7 @@ Notes
 - At runtime, env_file (./.env) still provides environment to the container, but client-side values come from build-time.
 - If you prefer plain docker build:
   docker build \
-    --build-arg NEXT_PUBLIC_MEDIAMTX_API_URL=$(grep ^NEXT_PUBLIC_MEDIAMTX_API_URL .env | cut -d= -f2-) \
+    --build-arg NEXT_PUBLIC_MEDIAMTX_API_URL=$(grep ^NEXT_PUBLIC_MEDIAMTX_API_URL .env | cut -d= -f2- || echo /api/mediamtx) \
     --build-arg NEXT_PUBLIC_MEDIAMTX_HLS_URL=$(grep ^NEXT_PUBLIC_MEDIAMTX_HLS_URL .env | cut -d= -f2-) \
     -t mediamtx-dashboard:latest .
   docker run --env-file .env -p 3000:3000 mediamtx-dashboard:latest
@@ -48,7 +49,7 @@ GitHub Pages (pnpm + Next.js)
 - Enable Pages: Repo Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
 - On push to main, the workflow runs: pnpm install, next build, next export to out, then deploys.
 - For org/repo pages (not username.github.io), the site is served under /<repo>; basePath is set automatically by the workflow.
-- If you need build-time envs (e.g., NEXT_PUBLIC_MEDIAMTX_API_URL), set repo variables/secrets and export them in the workflow, e.g.:
+- If you need build-time envs for a static export, set repo variables/secrets and export them in the workflow, e.g.:
   - name: Inject envs
     run: |
       echo "NEXT_PUBLIC_MEDIAMTX_API_URL=${{ vars.NEXT_PUBLIC_MEDIAMTX_API_URL }}" >> "$GITHUB_ENV"
