@@ -23,6 +23,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment variables for build
+ARG NEXT_PUBLIC_MEDIAMTX_API_URL="/api/mediamtx"
+ARG NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:8888"
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL=${NEXT_PUBLIC_MEDIAMTX_API_URL}
+ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -35,6 +39,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV MEDIAMTX_API_URL="http://mediamtx:9997"
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL="/api/mediamtx"
+ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:8888"
 
 # Create a non-root user
 RUN groupadd --gid 1001 nodejs && \

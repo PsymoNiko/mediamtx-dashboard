@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
+    "test": "node scripts/test-mediamtx-url.mjs",
     "start": "next start"
   },
   "dependencies": {
@@ -37,7 +38,7 @@
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
-    "eslint": "^8",
+    "eslint": "^8.57.1",
     "eslint-config-next": "15.0.3",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",

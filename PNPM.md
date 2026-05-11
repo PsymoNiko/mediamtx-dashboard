@@ -256,7 +256,8 @@ make up
 Create \`.env\` file:
 
 \`\`\`env
-NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997
+NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
+MEDIAMTX_API_URL=http://mediamtx:9997
 NODE_ENV=production
 \`\`\`
 
