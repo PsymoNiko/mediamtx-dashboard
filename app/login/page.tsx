@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Radio, AlertCircle } from "lucide-react"
+import { buildMediaMtxApiUrl } from "@/lib/mediamtx-url.mjs"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -25,8 +26,7 @@ export default function LoginPage() {
       const credentials = btoa(`${username}:${password}`)
 
       // Test the credentials by making a request to MediaMTX API
-      const apiUrl = process.env.NEXT_PUBLIC_MEDIAMTX_API_URL || "http://localhost:9997"
-      const response = await fetch(`${apiUrl}/v3/config/global/get`, {
+      const response = await fetch(buildMediaMtxApiUrl("/v3/config/global/get"), {
         headers: {
           Authorization: `Basic ${credentials}`,
         },

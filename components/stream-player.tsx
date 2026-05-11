@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
+import { buildMediaMtxHlsUrl } from "@/lib/mediamtx-url.mjs"
 
 interface StreamPlayerProps {
   pathName: string
@@ -17,7 +18,7 @@ export function StreamPlayer({ pathName }: StreamPlayerProps) {
     const video = videoRef.current
     if (!video) return
 
-    const hlsUrl = `${process.env.NEXT_PUBLIC_MEDIAMTX_HLS_URL || "http://localhost:8888"}/${pathName}/index.m3u8`
+    const hlsUrl = buildMediaMtxHlsUrl(pathName)
 
     setIsLoading(true)
     setError(null)

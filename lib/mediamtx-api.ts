@@ -1,6 +1,5 @@
 import { getAuthHeader } from "./auth"
-
-const API_URL = process.env.NEXT_PUBLIC_MEDIAMTX_API_URL
+import { buildMediaMtxApiUrl } from "./mediamtx-url.mjs"
 
 export interface PathConfig {
   name: string
@@ -44,7 +43,7 @@ export interface Path {
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const authHeader = getAuthHeader()
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(buildMediaMtxApiUrl(endpoint), {
     ...options,
     headers: {
       "Content-Type": "application/json",

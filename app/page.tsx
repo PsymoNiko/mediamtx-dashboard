@@ -1103,10 +1103,10 @@ function MediaMTXDashboard() {
                     <div className="text-blue-600">
                       [INFO] 2024-01-15 14:32:15 - New client connected: 192.168.1.100
                     </div>
-                    <div className="text-blue-600">[INFO] 2024-01-15 14:32:16 - Stream 'camera1' started</div>
+                    <div className="text-blue-600">[INFO] 2024-01-15 14:32:16 - Stream &apos;camera1&apos; started</div>
                     <div className="text-yellow-600">[WARN] 2024-01-15 14:35:22 - High CPU usage detected: 85%</div>
                     <div className="text-blue-600">
-                      [INFO] 2024-01-15 14:40:10 - Recording started for path 'camera1'
+                      [INFO] 2024-01-15 14:40:10 - Recording started for path &apos;camera1&apos;
                     </div>
                     <div className="text-green-600">[INFO] 2024-01-15 14:45:33 - WebRTC connection established</div>
                   </div>
@@ -1232,7 +1232,7 @@ function MediaMTXDashboard() {
           <DialogHeader>
             <DialogTitle>Delete Path</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the path "{pathToDelete}"? This action cannot be undone.
+              Are you sure you want to delete the path &quot;{pathToDelete}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

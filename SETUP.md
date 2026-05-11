@@ -11,7 +11,8 @@ Prerequisites
 
 Files
 - .env (runtime + build values)
-  - NEXT_PUBLIC_MEDIAMTX_API_URL=http://<host>:<port>/v3/config
+  - NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
+  - MEDIAMTX_API_URL=http://<mediamtx-service-or-host>:9997
   - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://<host>:<port>/hls
   - Other runtime vars as needed
 - .env.local is ignored by builds (see .dockerignore) to prevent accidental overrides.

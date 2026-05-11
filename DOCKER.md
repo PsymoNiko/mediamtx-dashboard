@@ -28,7 +28,7 @@ make up
 
 ### 3. Access the services
 
-- **Dashboard**: http://localhost:3000
+- **Dashboard**: http://localhost (via nginx) or http://localhost:3000
 - **MediaMTX API**: http://localhost:9997
 - **MediaMTX Metrics**: http://localhost:9998
 - **RTSP**: rtsp://localhost:8554
@@ -45,7 +45,9 @@ Create a `.env` file in the root directory to customize settings:
 \`\`\`env
 # Dashboard
 DASHBOARD_PORT=3000
-NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost:9997
+NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
+MEDIAMTX_API_URL=http://publisher:9997
+NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost/hls
 
 # MediaMTX Ports
 RTSP_PORT=8554
@@ -57,7 +59,7 @@ METRICS_PORT=9998
 
 # MediaMTX Authentication (optional)
 MEDIAMTX_USERNAME=admin
-MEDIAMTX_PASSWORD=changeme
+MEDIAMTX_PASSWORD=adminpass
 \`\`\`
 
 ### MediaMTX Configuration
@@ -162,7 +164,8 @@ Create a `.env.production` file:
 
 \`\`\`env
 NODE_ENV=production
-NEXT_PUBLIC_MEDIAMTX_API_URL=https://your-domain.com/api
+NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
+MEDIAMTX_API_URL=http://mediamtx:9997
 \`\`\`
 
 ### 3. Use a reverse proxy (recommended)
@@ -184,7 +187,8 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 
-    # MediaMTX API
+    # Optional direct MediaMTX API proxy. The dashboard also includes
+    # a same-origin /api/mediamtx proxy for browser requests.
     location /api/ {
         proxy_pass http://localhost:9997/;
         proxy_set_header Host $host;
