@@ -69,6 +69,8 @@ services:
       - "3000:3000"
     env_file:
       - ./.env
+    environment:
+      NEXT_PUBLIC_MEDIAMTX_API_URL: http://localhost:9997
         #depends_on:
         #  publisher:
         #    <<: *depends_on_healthy

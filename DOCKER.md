@@ -162,7 +162,7 @@ Create a `.env.production` file:
 
 \`\`\`env
 NODE_ENV=production
-NEXT_PUBLIC_MEDIAMTX_API_URL=https://your-domain.com/api
+NEXT_PUBLIC_MEDIAMTX_API_URL=https://your-domain.com
 \`\`\`
 
 ### 3. Use a reverse proxy (recommended)

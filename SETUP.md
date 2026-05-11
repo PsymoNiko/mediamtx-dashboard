@@ -11,8 +11,8 @@ Prerequisites
 
 Files
 - .env (runtime + build values)
-  - NEXT_PUBLIC_MEDIAMTX_API_URL=http://<host>:<port>/v3/config
-  - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://<host>:<port>/hls
+  - NEXT_PUBLIC_MEDIAMTX_API_URL=http://localhost:9997
+  - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost:8888
   - Other runtime vars as needed
 - .env.local is ignored by builds (see .dockerignore) to prevent accidental overrides.
 
@@ -26,6 +26,7 @@ Update Config
   docker compose --env-file .env up -d --build
 
 Notes
+- The browser should use a host-reachable MediaMTX API URL for Docker. `http://localhost:9997` works for the local Compose setup because the MediaMTX API port is published to the host; Docker service names such as `publisher` or `mediamtx` are not reachable from the browser.
 - At runtime, env_file (./.env) still provides environment to the container, but client-side values come from build-time.
 - If you prefer plain docker build:
   docker build \
