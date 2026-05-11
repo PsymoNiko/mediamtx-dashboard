@@ -97,6 +97,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
+    environment:
+      NEXT_PUBLIC_MEDIAMTX_API_URL: http://localhost:9997
     networks:
       - mediamtx_network
 
