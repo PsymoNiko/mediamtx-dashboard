@@ -8,12 +8,22 @@ import {
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
+assert.equal(normalizeMediaMtxApiBaseUrl(undefined, "/dashboard"), "/dashboard/api/mediamtx")
+assert.equal(normalizeMediaMtxApiBaseUrl(undefined, "dashboard/"), "/dashboard/api/mediamtx")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/"), "http://localhost:9997")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3"), "http://localhost")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config"), "http://localhost")
 
 assert.equal(
   buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx"),
+  "/api/mediamtx/v3/config/global/get",
+)
+assert.equal(
+  buildMediaMtxApiUrl("/v3/config/global/get", undefined, "/dashboard"),
+  "/dashboard/api/mediamtx/v3/config/global/get",
+)
+assert.equal(
+  buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx", "/dashboard"),
   "/api/mediamtx/v3/config/global/get",
 )
 assert.equal(
