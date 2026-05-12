@@ -1,3 +1,5 @@
+import { normalizeMediaMtxUpstreamApiBaseUrl } from "@/lib/mediamtx-url.mjs"
+
 const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -14,13 +16,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 ])
 
 function normalizeUpstreamApiUrl() {
-  const configuredUrl =
-    process.env.MEDIAMTX_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
-    DEFAULT_UPSTREAM_API_URL
-
-  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
+  return normalizeMediaMtxUpstreamApiBaseUrl() || DEFAULT_UPSTREAM_API_URL
 }
 
 function proxyHeaders(request: Request) {
