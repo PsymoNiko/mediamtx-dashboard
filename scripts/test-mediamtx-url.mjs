@@ -24,7 +24,15 @@ assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://l
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const mediamtxConfig = fs.readFileSync("mediamtx.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(mediamtxConfig.includes("authMethod: internal"))
+assert.ok(mediamtxConfig.includes("user: admin"))
+assert.ok(mediamtxConfig.includes("pass: adminpass"))
+assert.ok(
+  prodCompose.includes("Authorization: Basic YWRtaW46YWRtaW5wYXNz"),
+  "production MediaMTX healthcheck must authenticate with the default API credentials",
+)
