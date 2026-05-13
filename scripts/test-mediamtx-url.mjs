@@ -45,10 +45,16 @@ assert.equal(
 
 const localEnv = fs.readFileSync(".env.local", "utf8")
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const defaultCompose = fs.readFileSync("docker-compose.yml", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const mediamtxProxyRoute = fs.readFileSync("app/api/mediamtx/[...path]/route.ts", "utf8")
 
 assert.match(localEnv, /^NEXT_PUBLIC_MEDIAMTX_API_URL=\/api\/mediamtx$/m)
 assert.match(localEnv, /^MEDIAMTX_API_URL=http:\/\/localhost:9997$/m)
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(!defaultCompose.includes("condition: service_healthy"))
+assert.ok(!prodCompose.includes('wget", "--spider", "-q", "http://localhost:9997'))
+assert.ok(!prodCompose.includes("condition: service_healthy"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(mediamtxProxyRoute.includes("fetchWithStartupRetry"))

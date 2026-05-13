@@ -13,6 +13,12 @@ const HOP_BY_HOP_HEADERS = new Set([
   "upgrade",
 ])
 
+const PROXY_RETRY_DELAYS_MS = [200, 500, 1000, 2000]
+
+function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 function proxyHeaders(request: Request) {
   const headers = new Headers()
 
@@ -36,6 +42,31 @@ function responseHeaders(headers: Headers) {
   return responseHeaders
 }
 
+async function fetchWithStartupRetry(url: URL, init: RequestInit) {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt <= PROXY_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      return await fetch(url, init)
+    } catch (error) {
+      lastError = error
+
+      if (attempt === PROXY_RETRY_DELAYS_MS.length) {
+        break
+      }
+
+      await wait(PROXY_RETRY_DELAYS_MS[attempt])
+    }
+  }
+
+  console.error("[mediamtx] Upstream API request failed", lastError)
+
+  return new Response("MediaMTX API is not available yet", {
+    status: 503,
+    statusText: "Service Unavailable",
+  })
+}
+
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params
   const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeMediaMtxUpstreamApiBaseUrl()}/`)
@@ -43,10 +74,11 @@ async function proxyMediaMtxRequest(request: Request, context: { params: Promise
   upstreamUrl.search = incomingUrl.search
 
   const method = request.method.toUpperCase()
-  const response = await fetch(upstreamUrl, {
+  const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer()
+  const response = await fetchWithStartupRetry(upstreamUrl, {
     method,
     headers: proxyHeaders(request),
-    body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
+    body,
     cache: "no-store",
   })
 
