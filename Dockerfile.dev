@@ -24,6 +24,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+ARG NEXT_PUBLIC_MEDIAMTX_API_URL="/api/mediamtx"
+ARG NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:80/hls"
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL=${NEXT_PUBLIC_MEDIAMTX_API_URL}
+ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -35,6 +39,9 @@ WORKDIR /app
 
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL="/api/mediamtx"
+ENV MEDIAMTX_API_URL="http://publisher:9997"
+ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:80/hls"
 
 # Non-root user
 RUN addgroup --system --gid 1001 nodejs && \

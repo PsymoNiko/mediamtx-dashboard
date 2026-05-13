@@ -24,6 +24,10 @@ COPY . .
 
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_MEDIAMTX_API_URL="/api/mediamtx"
+ARG NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:80/hls"
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL=${NEXT_PUBLIC_MEDIAMTX_API_URL}
+ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL}
 
 # Build application
 RUN npm run build
@@ -34,6 +38,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_MEDIAMTX_API_URL="/api/mediamtx"
+ENV MEDIAMTX_API_URL="http://publisher:9997"
+ENV NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:80/hls"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
