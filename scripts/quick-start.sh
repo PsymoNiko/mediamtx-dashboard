@@ -4,11 +4,30 @@ echo "🚀 MediaMTX Quick Start"
 echo "======================="
 echo ""
 
+compose_cmd=()
+
+resolve_compose() {
+    if docker compose version > /dev/null 2>&1; then
+        compose_cmd=(docker compose)
+    elif command -v docker-compose > /dev/null 2>&1; then
+        compose_cmd=(docker-compose)
+    else
+        echo "❌ Docker Compose is not installed. Install Docker Compose v2 or the legacy docker-compose binary."
+        exit 1
+    fi
+}
+
+compose() {
+    "${compose_cmd[@]}" "$@"
+}
+
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
     echo "❌ Docker is not running. Please start Docker first."
     exit 1
 fi
+
+resolve_compose
 
 echo "Choose a start method:"
 echo ""
@@ -22,7 +41,7 @@ case $choice in
     1)
         echo ""
         echo "Starting MediaMTX server only..."
-        docker-compose -f docker-compose.local.yml up -d
+        compose -f docker-compose.local.yml up -d
         echo ""
         echo "✅ MediaMTX is running!"
         echo ""
@@ -40,10 +59,10 @@ case $choice in
         ./scripts/setup-docker.sh
         echo ""
         echo "Building Docker images (this may take a few minutes)..."
-        docker-compose -f docker-compose.yml build --no-cache
+        compose -f docker-compose.yml build --no-cache
         echo ""
         echo "Starting services..."
-        docker-compose -f docker-compose.yml up -d
+        compose -f docker-compose.yml up -d
         echo ""
         echo "✅ Services are starting!"
         echo ""
@@ -55,7 +74,7 @@ case $choice in
     3)
         echo ""
         echo "Starting services with existing images..."
-        docker-compose -f docker-compose.yml up -d
+        compose -f docker-compose.yml up -d
         echo ""
         echo "✅ Services started!"
         echo ""

@@ -4,6 +4,12 @@ echo "🔍 MediaMTX Docker Troubleshooting"
 echo "=================================="
 echo ""
 
+compose_cmd=()
+
+compose_command() {
+    printf "%s " "${compose_cmd[@]}"
+}
+
 # Check Docker
 echo "1. Checking Docker installation..."
 if command -v docker &> /dev/null; then
@@ -16,10 +22,15 @@ fi
 # Check Docker Compose
 echo ""
 echo "2. Checking Docker Compose..."
-if command -v docker-compose &> /dev/null; then
+if docker compose version &> /dev/null; then
+    compose_cmd=(docker compose)
+    echo "   ✅ Docker Compose is installed: $(docker compose version)"
+elif command -v docker-compose &> /dev/null; then
+    compose_cmd=(docker-compose)
     echo "   ✅ Docker Compose is installed: $(docker-compose --version)"
 else
     echo "   ❌ Docker Compose is not installed"
+    echo "   Install Docker Compose v2 or the legacy docker-compose binary"
     exit 1
 fi
 
@@ -30,7 +41,7 @@ if ping -c 1 dl-cdn.alpinelinux.org &> /dev/null; then
     echo "   ✅ Can reach Alpine package servers"
 else
     echo "   ⚠️  Cannot reach Alpine servers (will use Debian image)"
-    echo "   Run: docker-compose build --build-arg DOCKERFILE=Dockerfile.debian"
+    echo "   Run: $(compose_command)-f docker-compose.prod.yml build dashboard"
 fi
 
 # Check ports
@@ -66,10 +77,8 @@ else
         docker rmi mediamtx-test:debian &> /dev/null
         echo ""
         echo "   💡 Recommendation: Use Dockerfile.debian"
-        echo "   Edit docker-compose.yml and change:"
-        echo "   dockerfile: Dockerfile"
-        echo "   to:"
-        echo "   dockerfile: Dockerfile.debian"
+        echo "   Run the Debian compose stack:"
+        echo "   $(compose_command)-f docker-compose.prod.yml up -d --build"
     else
         echo "   ❌ Debian build also failed"
     fi
