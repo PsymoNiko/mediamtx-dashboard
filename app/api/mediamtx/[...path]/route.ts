@@ -1,4 +1,4 @@
-const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
+import { normalizeMediaMtxServerApiBaseUrl } from "@/lib/mediamtx-url.mjs"
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -12,16 +12,6 @@ const HOP_BY_HOP_HEADERS = new Set([
   "transfer-encoding",
   "upgrade",
 ])
-
-function normalizeUpstreamApiUrl() {
-  const configuredUrl =
-    process.env.MEDIAMTX_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
-    DEFAULT_UPSTREAM_API_URL
-
-  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
-}
 
 function proxyHeaders(request: Request) {
   const headers = new Headers()
@@ -48,7 +38,7 @@ function responseHeaders(headers: Headers) {
 
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params
-  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeUpstreamApiUrl()}/`)
+  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeMediaMtxServerApiBaseUrl()}/`)
   const incomingUrl = new URL(request.url)
   upstreamUrl.search = incomingUrl.search
 
