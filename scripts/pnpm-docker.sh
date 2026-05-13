@@ -52,7 +52,15 @@ case "$1" in
   
   logs)
     echo "Showing logs (Ctrl+C to exit)..."
-    docker-compose logs -f "${2:-}"
+    service="${2:-}"
+    if [ "$service" = "mediamtx" ]; then
+      service="publisher"
+    fi
+    if [ -n "$service" ]; then
+      docker-compose logs -f "$service"
+    else
+      docker-compose logs -f
+    fi
     ;;
   
   clean)
@@ -77,7 +85,7 @@ case "$1" in
     if [ "$2" = "dashboard" ]; then
       docker-compose exec dashboard sh
     elif [ "$2" = "mediamtx" ]; then
-      docker-compose exec mediamtx sh
+      docker-compose exec publisher sh
     else
       echo "Usage: $0 shell [dashboard|mediamtx]"
       exit 1

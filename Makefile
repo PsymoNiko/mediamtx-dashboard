@@ -72,7 +72,7 @@ logs-dashboard: ## Show logs from dashboard only
 	docker-compose logs -f dashboard
 
 logs-mediamtx: ## Show logs from MediaMTX only
-	docker-compose logs -f mediamtx
+	docker-compose logs -f publisher
 
 clean: ## Clean up everything
 	docker-compose down -v
@@ -92,7 +92,7 @@ shell-dashboard: ## Open shell in dashboard container
 	docker-compose exec dashboard sh
 
 shell-mediamtx: ## Open shell in MediaMTX container
-	docker-compose exec mediamtx sh
+	docker-compose exec publisher sh
 
 ps: ## Show running containers
 	docker-compose ps

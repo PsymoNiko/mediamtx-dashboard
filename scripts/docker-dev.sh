@@ -57,7 +57,7 @@ case "$1" in
     if [ "$2" = "dashboard" ]; then
       docker-compose exec dashboard sh
     elif [ "$2" = "mediamtx" ]; then
-      docker-compose exec mediamtx sh
+      docker-compose exec publisher sh
     else
       echo "Usage: $0 shell [dashboard|mediamtx]"
       exit 1
