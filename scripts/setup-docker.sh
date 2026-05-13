@@ -3,15 +3,6 @@
 echo "🔧 Setting up Docker build environment..."
 echo ""
 
-# Check if package-lock.json exists
-if [ ! -f "package-lock.json" ]; then
-    echo "📦 package-lock.json not found, generating..."
-    npm install --package-lock-only
-    echo "✅ package-lock.json created"
-else
-    echo "✅ package-lock.json exists"
-fi
-
 # Verify package.json
 if [ -f "package.json" ]; then
     echo "✅ package.json exists"
@@ -20,10 +11,14 @@ else
     exit 1
 fi
 
-# Clean npm cache
-echo ""
-echo "🧹 Cleaning npm cache..."
-npm cache clean --force
+# Verify pnpm lockfile used by the Docker builds
+if [ -f "pnpm-lock.yaml" ]; then
+    echo "✅ pnpm-lock.yaml exists"
+else
+    echo "❌ pnpm-lock.yaml not found!"
+    echo "   Run: pnpm install --lockfile-only"
+    exit 1
+fi
 
 # Remove node_modules if exists
 if [ -d "node_modules" ]; then
