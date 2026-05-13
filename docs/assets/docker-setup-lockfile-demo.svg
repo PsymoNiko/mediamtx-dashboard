@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Docker setup lockfile handling demo</title>
+  <desc id="desc">Shows the setup-docker lockfile behavior before and after the fix, with verification commands.</desc>
+  <rect width="1280" height="720" fill="#0b1020"/>
+  <rect x="40" y="36" width="1200" height="648" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+  <circle cx="78" cy="74" r="8" fill="#ef4444"/>
+  <circle cx="106" cy="74" r="8" fill="#f59e0b"/>
+  <circle cx="134" cy="74" r="8" fill="#22c55e"/>
+  <text x="64" y="132" fill="#f8fafc" font-family="Menlo, Consolas, monospace" font-size="38" font-weight="700">Docker setup lockfile handling</text>
+  <text x="64" y="196" fill="#fb7185" font-family="Menlo, Consolas, monospace" font-size="30" font-weight="700">Before</text>
+  <text x="96" y="246" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="24">setup-docker.sh ran:</text>
+  <text x="128" y="286" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="24">npm install --package-lock-only</text>
+  <text x="96" y="326" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="24">That created package-lock.json in a pnpm repo.</text>
+  <text x="64" y="394" fill="#5eead4" font-family="Menlo, Consolas, monospace" font-size="30" font-weight="700">After</text>
+  <text x="96" y="444" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="24">setup-docker.sh validates package.json + pnpm-lock.yaml.</text>
+  <text x="96" y="484" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="24">No npm lockfile generation or npm cache cleanup.</text>
+  <text x="64" y="512" fill="#facc15" font-family="Menlo, Consolas, monospace" font-size="30" font-weight="700">Verification</text>
+  <text x="96" y="554" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="19">$ node scripts/test-mediamtx-url.mjs</text>
+  <text x="96" y="584" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="19">$ bash -n scripts/setup-docker.sh</text>
+  <text x="96" y="614" fill="#e2e8f0" font-family="Menlo, Consolas, monospace" font-size="19">$ git diff --check</text>
+</svg>
