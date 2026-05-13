@@ -39,7 +39,8 @@ pnpm-build: ## Build Docker image with pnpm
 pnpm-build-dev: ## Build development image with pnpm
 	docker-compose -f docker-compose.dev.yml build --no-cache
 
-pnpm-dev: export LOCALHOST=$(LOCALHOST) ## Start in development mode with hot‑reload
+pnpm-dev: export LOCALHOST=$(LOCALHOST)
+pnpm-dev: ## Start in development mode with hot‑reload
 	@echo "🚀 Running with LOCALHOST=$(LOCALHOST)"
 	docker-compose -f docker-compose.dev.yml up
 
@@ -52,6 +53,10 @@ pnpm-clean: ## Clean pnpm cache and lockfile
 # -------------------------------------------------
 .PHONY: build up down restart logs logs-dashboard logs-mediamtx clean rebuild dev \
         shell-dashboard shell-mediamtx ps health status
+
+MEDIAMTX_HEALTH_URL ?= http://localhost:9997/v3/config/global/get
+MEDIAMTX_HEALTH_USERNAME ?= admin
+MEDIAMTX_HEALTH_PASSWORD ?= adminpass
 
 build: pnpm-setup pnpm-build ## Build production images
 
@@ -99,7 +104,7 @@ ps: ## Show running containers
 
 health: ## Check service health
 	@echo "Checking services..."
-	@curl -f http://localhost:9997/v3/config/global/get 2>/dev/null && echo "✅ MediaMTX OK" || echo "❌ MediaMTX not responding"
+	@curl -f -u "$(MEDIAMTX_HEALTH_USERNAME):$(MEDIAMTX_HEALTH_PASSWORD)" "$(MEDIAMTX_HEALTH_URL)" 2>/dev/null && echo "✅ MediaMTX OK" || echo "❌ MediaMTX not responding"
 	@curl -f http://localhost:3000 2>/dev/null && echo "✅ Dashboard OK" || echo "❌ Dashboard not responding"
 
 status: ## Show detailed status
