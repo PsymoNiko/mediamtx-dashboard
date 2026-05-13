@@ -13,7 +13,7 @@ help: ## Show this help message
 	@echo 'Usage: make [target] [VARIABLE=value]'
 	@echo ''
 	@echo 'Available targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-25s %s\n", $1, $2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # -------------------------------------------------
 # pnpm‑specific commands
@@ -39,12 +39,12 @@ pnpm-build: ## Build Docker image with pnpm
 pnpm-build-dev: ## Build development image with pnpm
 	docker-compose -f docker-compose.dev.yml build --no-cache
 
-pnpm-dev: export LOCALHOST=$(LOCALHOST) ## Start in development mode with hot‑reload
+pnpm-dev: ## Start in development mode with hot‑reload
 	@echo "🚀 Running with LOCALHOST=$(LOCALHOST)"
-	docker-compose -f docker-compose.dev.yml up
+	LOCALHOST=$(LOCALHOST) docker-compose -f docker-compose.dev.yml up
 
-pnpm-clean: ## Clean pnpm cache and lockfile
-	rm -rf node_modules .next pnpm-lock.yaml
+pnpm-clean: ## Clean local pnpm build artifacts
+	rm -rf node_modules .next
 	pnpm store prune || true
 
 # -------------------------------------------------
