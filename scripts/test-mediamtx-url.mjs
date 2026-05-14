@@ -47,6 +47,7 @@ const localEnv = fs.readFileSync(".env.local", "utf8")
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const defaultCompose = fs.readFileSync("docker-compose.yml", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const prometheusConfig = fs.readFileSync("prometheus.yml", "utf8")
 const mediamtxProxyRoute = fs.readFileSync("app/api/mediamtx/[...path]/route.ts", "utf8")
 const dockerDevScript = fs.readFileSync("scripts/docker-dev.sh", "utf8")
 const pnpmDockerScript = fs.readFileSync("scripts/pnpm-docker.sh", "utf8")
@@ -60,6 +61,10 @@ assert.ok(!prodCompose.includes("condition: service_healthy"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(mediamtxProxyRoute.includes("fetchWithStartupRetry"))
+
+const mediamtxScrapeJob = prometheusConfig.match(/- job_name: mediamtx[\s\S]*?(?=\n\s*- job_name:|\s*$)/)?.[0] ?? ""
+assert.match(mediamtxScrapeJob, /basic_auth:\s*\n\s*username: admin\s*\n\s*password: adminpass/)
+assert.match(mediamtxScrapeJob, /targets:\s*\n\s*-\s*'publisher:9998'/)
 
 const directDockerComposeCommand = /^\s*docker-compose(?:\s|$)/m
 assert.match(dockerDevScript, /COMPOSE=\(docker compose\)/)
