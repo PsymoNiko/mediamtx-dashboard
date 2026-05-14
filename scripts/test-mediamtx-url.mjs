@@ -23,8 +23,12 @@ assert.equal(
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const defaultCompose = fs.readFileSync("docker-compose.yml", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(!defaultCompose.includes("env_file:"))
+assert.ok(defaultCompose.includes("MEDIAMTX_API_URL: ${MEDIAMTX_API_URL:-http://publisher:9997}"))
+assert.ok(defaultCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL:-/api/mediamtx}"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
