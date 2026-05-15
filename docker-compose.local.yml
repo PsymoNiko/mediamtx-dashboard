@@ -16,6 +16,12 @@ services:
       - ./recordings:/recordings
     environment:
       - MTX_PROTOCOLS=tcp
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "--header", "Authorization: Basic YWRtaW46YWRtaW5wYXNz", "http://localhost:9997/v3/config/global/get"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     networks:
       - mediamtx-network
 

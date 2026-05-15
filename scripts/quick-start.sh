@@ -23,6 +23,20 @@ case $choice in
         echo ""
         echo "Starting MediaMTX server only..."
         docker-compose -f docker-compose.local.yml up -d
+        echo "Waiting for the MediaMTX API to accept the default credentials..."
+        mediamtx_ready=0
+        for attempt in {1..30}; do
+            if curl -fsS -u admin:adminpass http://localhost:9997/v3/config/global/get > /dev/null 2>&1; then
+                mediamtx_ready=1
+                break
+            fi
+            sleep 1
+        done
+        if [ "$mediamtx_ready" != "1" ]; then
+            echo "❌ MediaMTX API did not become ready with admin/adminpass."
+            echo "   Check logs with: docker-compose -f docker-compose.local.yml logs mediamtx"
+            exit 1
+        fi
         echo ""
         echo "✅ MediaMTX is running!"
         echo ""
