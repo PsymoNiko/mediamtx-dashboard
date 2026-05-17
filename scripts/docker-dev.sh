@@ -7,10 +7,29 @@ set -e
 echo "🐳 MediaMTX Dashboard - Docker Development Helper"
 echo ""
 
+compose_cmd=()
+
+resolve_compose() {
+  if docker compose version > /dev/null 2>&1; then
+    compose_cmd=(docker compose)
+  elif command -v docker-compose > /dev/null 2>&1; then
+    compose_cmd=(docker-compose)
+  else
+    echo "❌ Docker Compose is not installed. Install Docker Compose v2 or the legacy docker-compose binary."
+    exit 1
+  fi
+}
+
+compose() {
+  "${compose_cmd[@]}" "$@"
+}
+
+resolve_compose
+
 case "$1" in
   start)
     echo "Starting services..."
-    docker-compose up -d
+    compose up -d
     echo "✅ Services started!"
     echo "Dashboard: http://localhost:3000"
     echo "MediaMTX API: http://localhost:9997"
@@ -18,46 +37,46 @@ case "$1" in
   
   stop)
     echo "Stopping services..."
-    docker-compose down
+    compose down
     echo "✅ Services stopped!"
     ;;
   
   restart)
     echo "Restarting services..."
-    docker-compose restart
+    compose restart
     echo "✅ Services restarted!"
     ;;
   
   logs)
     echo "Showing logs (Ctrl+C to exit)..."
-    docker-compose logs -f
+    compose logs -f
     ;;
   
   rebuild)
     echo "Rebuilding services..."
-    docker-compose down
-    docker-compose build --no-cache
-    docker-compose up -d
+    compose down
+    compose build --no-cache
+    compose up -d
     echo "✅ Services rebuilt and started!"
     ;;
   
   clean)
     echo "Cleaning up..."
-    docker-compose down -v
+    compose down -v
     docker system prune -f
     echo "✅ Cleanup complete!"
     ;;
   
   status)
     echo "Service status:"
-    docker-compose ps
+    compose ps
     ;;
   
   shell)
     if [ "$2" = "dashboard" ]; then
-      docker-compose exec dashboard sh
+      compose exec dashboard sh
     elif [ "$2" = "mediamtx" ]; then
-      docker-compose exec mediamtx sh
+      compose exec mediamtx sh
     else
       echo "Usage: $0 shell [dashboard|mediamtx]"
       exit 1

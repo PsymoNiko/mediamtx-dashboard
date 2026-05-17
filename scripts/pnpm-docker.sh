@@ -7,6 +7,25 @@ set -e
 echo "🚀 MediaMTX Dashboard - pnpm Docker Manager"
 echo ""
 
+compose_cmd=()
+
+resolve_compose() {
+  if docker compose version > /dev/null 2>&1; then
+    compose_cmd=(docker compose)
+  elif command -v docker-compose > /dev/null 2>&1; then
+    compose_cmd=(docker-compose)
+  else
+    echo "❌ Docker Compose is not installed. Install Docker Compose v2 or the legacy docker-compose binary."
+    exit 1
+  fi
+}
+
+compose() {
+  "${compose_cmd[@]}" "$@"
+}
+
+resolve_compose
+
 case "$1" in
   setup)
     echo "Setting up pnpm environment..."
@@ -16,17 +35,17 @@ case "$1" in
   
   build)
     echo "Building with pnpm..."
-    docker-compose build --no-cache
+    compose build --no-cache
     ;;
   
   build-dev)
     echo "Building development image with pnpm..."
-    docker-compose -f docker-compose.dev.yml build --no-cache
+    compose -f docker-compose.dev.yml build --no-cache
     ;;
   
   start)
     echo "Starting services..."
-    docker-compose up -d
+    compose up -d
     echo "✅ Services started!"
     echo "Dashboard: http://localhost:3000"
     echo "MediaMTX API: http://localhost:9997"
@@ -34,31 +53,31 @@ case "$1" in
   
   dev)
     echo "Starting in development mode with hot-reload..."
-    docker-compose -f docker-compose.dev.yml up
+    compose -f docker-compose.dev.yml up
     ;;
   
   stop)
     echo "Stopping services..."
-    docker-compose down
-    docker-compose -f docker-compose.dev.yml down 2>/dev/null || true
+    compose down
+    compose -f docker-compose.dev.yml down 2>/dev/null || true
     echo "✅ Services stopped!"
     ;;
   
   restart)
     echo "Restarting services..."
-    docker-compose restart
+    compose restart
     echo "✅ Services restarted!"
     ;;
   
   logs)
     echo "Showing logs (Ctrl+C to exit)..."
-    docker-compose logs -f "${2:-}"
+    compose logs -f "${2:-}"
     ;;
   
   clean)
     echo "Cleaning up..."
-    docker-compose down -v
-    docker-compose -f docker-compose.dev.yml down -v 2>/dev/null || true
+    compose down -v
+    compose -f docker-compose.dev.yml down -v 2>/dev/null || true
     rm -rf node_modules .next pnpm-lock.yaml
     docker system prune -f
     echo "✅ Cleanup complete!"
@@ -75,9 +94,9 @@ case "$1" in
   
   shell)
     if [ "$2" = "dashboard" ]; then
-      docker-compose exec dashboard sh
+      compose exec dashboard sh
     elif [ "$2" = "mediamtx" ]; then
-      docker-compose exec mediamtx sh
+      compose exec mediamtx sh
     else
       echo "Usage: $0 shell [dashboard|mediamtx]"
       exit 1
@@ -92,7 +111,7 @@ case "$1" in
   
   status)
     echo "Service status:"
-    docker-compose ps
+    compose ps
     echo ""
     echo "Docker images:"
     docker images | grep mediamtx

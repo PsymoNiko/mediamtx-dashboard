@@ -24,7 +24,18 @@ assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://l
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const dockerDevScript = fs.readFileSync("scripts/docker-dev.sh", "utf8")
+const pnpmDockerScript = fs.readFileSync("scripts/pnpm-docker.sh", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+
+for (const [scriptName, script] of [
+  ["scripts/docker-dev.sh", dockerDevScript],
+  ["scripts/pnpm-docker.sh", pnpmDockerScript],
+]) {
+  assert.ok(script.includes("docker compose version"), `${scriptName} should probe Docker Compose v2`)
+  assert.ok(script.includes("compose_cmd=(docker compose)"), `${scriptName} should prefer Docker Compose v2`)
+  assert.ok(!/^\s*docker-compose\s+(up|down|restart|logs|build|ps|exec|-f)\b/m.test(script))
+}
