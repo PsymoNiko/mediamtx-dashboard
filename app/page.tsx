@@ -39,6 +39,7 @@ import {
   Edit,
   VideoIcon,
 } from "lucide-react"
+import { ModeToggle } from "@/components/mode-toggle"
 import { ProtectedRoute } from "@/components/protected-route"
 import { clearAuth, getUsername } from "@/lib/auth"
 import { StreamPlayer } from "@/components/stream-player"
@@ -220,8 +221,8 @@ function MediaMTXDashboard() {
   const totalViewers = livePaths.reduce((sum, p) => sum + p.readers.length, 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -238,10 +239,11 @@ function MediaMTXDashboard() {
                 <Activity className="w-3 h-3 mr-1" />
                 Online
               </Badge>
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-md">
-                <Users className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">{username}</span>
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-md">
+                <Users className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{username}</span>
               </div>
+              <ModeToggle />
               <Button size="sm" variant="outline" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout

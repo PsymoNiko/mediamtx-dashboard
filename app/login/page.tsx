@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Radio, AlertCircle } from "lucide-react"
+import { Radio, AlertCircle, CheckCircle2, XCircle, Info } from "lucide-react"
 import { buildMediaMtxApiUrl } from "@/lib/mediamtx-url.mjs"
 
 export default function LoginPage() {
@@ -15,6 +15,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [diagResult, setDiagResult] = useState<any>(null)
+  const [isChecking, setIsChecking] = useState(false)
+
+  const runDiagnostics = async () => {
+    setIsChecking(true)
+    try {
+      const resp = await fetch("/api/diagnostics")
+      const data = await resp.json()
+      setDiagResult(data)
+    } catch (err) {
+      setDiagResult({ error: "Failed to run diagnostics" })
+    } finally {
+      setIsChecking(false)
+    }
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -41,6 +56,9 @@ export default function LoginPage() {
         router.push("/")
       } else {
         setError("Invalid username or password")
+        if (response.status === 404) {
+          setError("MediaMTX API not found. Check your MEDIAMTX_API_URL.")
+        }
       }
     } catch (err) {
       setError("Failed to connect to MediaMTX server")
@@ -51,7 +69,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 flex flex-col items-center">
           <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mb-4">
@@ -88,9 +106,49 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                <AlertCircle className="w-4 h-4" />
-                <span>{error}</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+                {!diagResult && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full text-xs text-blue-600 hover:text-blue-700 h-7"
+                    onClick={runDiagnostics}
+                    disabled={isChecking}
+                  >
+                    {isChecking ? "Checking connection..." : "Run Connection Diagnostics"}
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {diagResult && (
+              <div className="text-xs p-3 rounded-md bg-blue-50 border border-blue-100 space-y-2">
+                <div className="flex items-center justify-between font-semibold text-blue-800">
+                  <div className="flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    <span>Diagnostics Report</span>
+                  </div>
+                  <button onClick={() => setDiagResult(null)} className="text-blue-400 hover:text-blue-600">×</button>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    {diagResult.checks?.upstream_reachable ? <CheckCircle2 className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
+                    <span>API Reachable: {diagResult.checks?.upstream_reachable ? "Yes" : "No"}</span>
+                  </div>
+                  <div className="text-[10px] text-gray-500 pl-5 font-mono truncate" title={diagResult.upstream_url}>
+                    Target: {diagResult.upstream_url}
+                  </div>
+                  {diagResult.error && (
+                    <div className="text-[10px] text-red-500 pl-5 italic">
+                      Error: {diagResult.error}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
