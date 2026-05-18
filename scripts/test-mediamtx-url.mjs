@@ -24,7 +24,14 @@ assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://l
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const mediaMtxProxyRoute = fs.readFileSync("app/api/mediamtx/[...path]/route.ts", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+
+assert.ok(mediaMtxProxyRoute.includes("export function OPTIONS"))
+assert.ok(mediaMtxProxyRoute.includes("export const HEAD = proxyMediaMtxRequest"))
+assert.ok(mediaMtxProxyRoute.includes("GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS"))
+assert.ok(mediaMtxProxyRoute.includes("Access-Control-Allow-Headers"))
+assert.ok(mediaMtxProxyRoute.includes("access-control-request-headers"))
