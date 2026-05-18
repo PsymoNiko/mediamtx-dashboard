@@ -24,7 +24,14 @@ assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://l
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const quickStart = fs.readFileSync("scripts/quick-start.sh", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(quickStart.includes("run dashboard locally with 'pnpm dev'"))
+assert.ok(quickStart.includes("Install dependencies: pnpm install"))
+assert.ok(quickStart.includes("Start dashboard: pnpm dev"))
+assert.ok(!quickStart.includes("run dashboard locally with 'npm run dev'"))
+assert.ok(!quickStart.includes("Install dependencies: npm install"))
+assert.ok(!quickStart.includes("Start dashboard: npm run dev"))
