@@ -24,7 +24,13 @@ assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://l
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const quickStart = fs.readFileSync("scripts/quick-start.sh", "utf8")
+const troubleshoot = fs.readFileSync("scripts/troubleshoot.sh", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(quickStart.includes("docker compose version"))
+assert.ok(!quickStart.includes("docker-compose -f "))
+assert.ok(troubleshoot.includes("docker compose version"))
+assert.ok(!troubleshoot.includes("docker-compose build --build-arg DOCKERFILE=Dockerfile.debian"))
