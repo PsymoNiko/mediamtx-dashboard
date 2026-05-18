@@ -59,7 +59,7 @@ case "$1" in
     echo "Cleaning up..."
     docker-compose down -v
     docker-compose -f docker-compose.dev.yml down -v 2>/dev/null || true
-    rm -rf node_modules .next pnpm-lock.yaml
+    rm -rf node_modules .next
     docker system prune -f
     echo "✅ Cleanup complete!"
     ;;
