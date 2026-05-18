@@ -1,3 +1,11 @@
+import { NextResponse } from "next/server"
+
+import {
+  isAbortError,
+  mediaMtxProxyErrorPayload,
+  parseMediaMtxProxyTimeoutMs,
+} from "@/lib/mediamtx-proxy.mjs"
+
 const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -48,17 +56,38 @@ function responseHeaders(headers: Headers) {
 
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params
-  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeUpstreamApiUrl()}/`)
+  const upstreamBaseUrl = normalizeUpstreamApiUrl()
+  let upstreamUrl: URL
+
+  try {
+    upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${upstreamBaseUrl}/`)
+  } catch (error) {
+    return NextResponse.json(mediaMtxProxyErrorPayload({ error, upstreamUrl: upstreamBaseUrl }), { status: 502 })
+  }
+
   const incomingUrl = new URL(request.url)
   upstreamUrl.search = incomingUrl.search
 
   const method = request.method.toUpperCase()
-  const response = await fetch(upstreamUrl, {
-    method,
-    headers: proxyHeaders(request),
-    body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
-    cache: "no-store",
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), parseMediaMtxProxyTimeoutMs())
+  let response: Response
+
+  try {
+    response = await fetch(upstreamUrl, {
+      method,
+      headers: proxyHeaders(request),
+      body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
+      cache: "no-store",
+      signal: controller.signal,
+    })
+  } catch (error) {
+    return NextResponse.json(mediaMtxProxyErrorPayload({ error, upstreamUrl: upstreamBaseUrl }), {
+      status: isAbortError(error) ? 504 : 502,
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
 
   return new Response(response.body, {
     status: response.status,
