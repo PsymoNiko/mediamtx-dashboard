@@ -1,6 +1,12 @@
 import { getAuthHeader } from "./auth"
 import { buildMediaMtxApiUrl } from "./mediamtx-url.mjs"
 
+interface PagedList<T> {
+  pageCount: number
+  itemCount: number
+  items: T[]
+}
+
 export interface PathConfig {
   name: string
   source: string
@@ -79,14 +85,35 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return text
 }
 
+// Collects every page of a paginated MediaMTX list endpoint.
+// MediaMTX uses 0-based page numbers and returns pageCount in each response.
+async function fetchAllPages<T>(endpoint: string): Promise<T[]> {
+  const first = (await fetchAPI(`${endpoint}?page=0`)) as PagedList<T>
+  const all: T[] = Array.isArray(first?.items) ? [...first.items] : []
+  const pageCount = first?.pageCount ?? 1
+
+  if (pageCount <= 1) return all
+
+  // Fetch remaining pages in parallel — safe for typical deployments.
+  const rest = await Promise.all(
+    Array.from({ length: pageCount - 1 }, (_, i) =>
+      fetchAPI(`${endpoint}?page=${i + 1}`) as Promise<PagedList<T>>,
+    ),
+  )
+
+  for (const page of rest) {
+    if (Array.isArray(page?.items)) all.push(...page.items)
+  }
+
+  return all
+}
+
 export async function getPathConfigs(): Promise<PathConfig[]> {
-  const data = await fetchAPI("/v3/config/paths/list")
-  return data.items || []
+  return fetchAllPages<PathConfig>("/v3/config/paths/list")
 }
 
 export async function getPaths(): Promise<Path[]> {
-  const data = await fetchAPI("/v3/paths/list")
-  return data.items || []
+  return fetchAllPages<Path>("/v3/paths/list")
 }
 
 export async function addPath(config: PathConfig): Promise<void> {
