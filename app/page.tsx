@@ -44,6 +44,9 @@ import { clearAuth, getUsername } from "@/lib/auth"
 import { StreamPlayer } from "@/components/stream-player"
 import * as api from "@/lib/mediamtx-api"
 import type { PathConfig, Path as LivePath } from "@/lib/mediamtx-api"
+import { buildDashboardPathRows, summarizeDashboardPaths } from "@/lib/path-display.mjs"
+
+type DashboardPathRow = PathConfig & { runtimeOnly?: boolean }
 
 function MediaMTXDashboard() {
   const router = useRouter()
@@ -95,7 +98,7 @@ function MediaMTXDashboard() {
     setIsLoadingPaths(true)
     try {
       const [configs, live] = await Promise.all([api.getPathConfigs(), api.getPaths()])
-      setPaths(configs.filter((p) => p.name !== "all_others"))
+      setPaths(configs)
       setLivePaths(live)
     } catch (error) {
       console.error("Error fetching paths:", error)
@@ -168,6 +171,12 @@ function MediaMTXDashboard() {
     }
   }
 
+  const pathRows = buildDashboardPathRows(paths, livePaths) as DashboardPathRow[]
+  const { activeStreamsCount, idleConfiguredCount, totalDashboardPathCount } = summarizeDashboardPaths(
+    paths,
+    livePaths,
+  )
+
   const handleLogout = () => {
     clearAuth()
     router.push("/login")
@@ -215,8 +224,6 @@ function MediaMTXDashboard() {
     }
   }
 
-  // Replace the activeStreams useState with calculated values
-  const activeStreamsCount = livePaths.filter((p) => p.ready).length
   const totalViewers = livePaths.reduce((sum, p) => sum + p.readers.length, 0)
 
   return (
@@ -290,7 +297,7 @@ function MediaMTXDashboard() {
                 <CardContent>
                   <div className="text-2xl font-bold">{activeStreamsCount}</div>
                   <p className="text-xs text-muted-foreground">
-                    {activeStreamsCount} live, {paths.length - activeStreamsCount} idle
+                    {activeStreamsCount} live, {idleConfiguredCount} idle
                   </p>
                 </CardContent>
               </Card>
@@ -310,8 +317,8 @@ function MediaMTXDashboard() {
                   <Globe className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{paths.length}</div>
-                  <p className="text-xs text-muted-foreground">Configured paths</p>
+                  <div className="text-2xl font-bold">{totalDashboardPathCount}</div>
+                  <p className="text-xs text-muted-foreground">Configured and live paths</p>
                 </CardContent>
               </Card>
               <Card>
@@ -337,7 +344,7 @@ function MediaMTXDashboard() {
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
                     <p className="text-sm text-gray-600">Loading streams...</p>
                   </div>
-                ) : paths.length === 0 ? (
+                ) : pathRows.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <VideoIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No paths configured</p>
@@ -347,7 +354,7 @@ function MediaMTXDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {paths.map((path) => {
+                    {pathRows.map((path) => {
                       const status = getPathStatus(path.name)
                       return (
                         <div key={path.name} className="border rounded-lg overflow-hidden">
@@ -365,6 +372,7 @@ function MediaMTXDashboard() {
                                       LIVE
                                     </Badge>
                                   )}
+                                  {path.runtimeOnly && <Badge variant="outline">Runtime</Badge>}
                                 </div>
                                 <p className="text-sm text-gray-500">{path.source}</p>
                                 <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
@@ -388,12 +396,16 @@ function MediaMTXDashboard() {
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => handleEditPath(path)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => confirmDelete(path.name)}>
-                                <Trash2 className="w-4 h-4 text-red-600" />
-                              </Button>
+                              {!path.runtimeOnly && (
+                                <>
+                                  <Button size="sm" variant="outline" onClick={() => handleEditPath(path)}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => confirmDelete(path.name)}>
+                                    <Trash2 className="w-4 h-4 text-red-600" />
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
                           {selectedStreamPath === path.name && status.isLive && (
@@ -785,7 +797,7 @@ function MediaMTXDashboard() {
                       <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
                       <p className="text-sm text-gray-600">Loading paths...</p>
                     </div>
-                  ) : paths.length === 0 ? (
+                  ) : pathRows.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       <VideoIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                       <p>No paths configured</p>
@@ -794,7 +806,7 @@ function MediaMTXDashboard() {
                       </Button>
                     </div>
                   ) : (
-                    paths.map((path) => {
+                    pathRows.map((path) => {
                       const status = getPathStatus(path.name)
                       return (
                         <div key={path.name} className="border rounded-lg overflow-hidden">
@@ -812,6 +824,7 @@ function MediaMTXDashboard() {
                                       LIVE
                                     </Badge>
                                   )}
+                                  {path.runtimeOnly && <Badge variant="outline">Runtime</Badge>}
                                 </div>
                                 <p className="text-sm text-gray-500">{path.source}</p>
                                 <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
@@ -835,12 +848,16 @@ function MediaMTXDashboard() {
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => handleEditPath(path)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => confirmDelete(path.name)}>
-                                <Trash2 className="w-4 h-4 text-red-600" />
-                              </Button>
+                              {!path.runtimeOnly && (
+                                <>
+                                  <Button size="sm" variant="outline" onClick={() => handleEditPath(path)}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => confirmDelete(path.name)}>
+                                    <Trash2 className="w-4 h-4 text-red-600" />
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
                           {selectedStreamPath === path.name && status.isLive && (
