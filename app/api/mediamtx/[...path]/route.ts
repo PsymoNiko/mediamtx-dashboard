@@ -1,3 +1,5 @@
+import { appendVaryHeader, corsHeaders, PROXY_HEADERS } from "../../../../lib/mediamtx-proxy-cors.mjs"
+
 const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -26,7 +28,7 @@ function normalizeUpstreamApiUrl() {
 function proxyHeaders(request: Request) {
   const headers = new Headers()
 
-  for (const header of ["accept", "authorization", "content-type"]) {
+  for (const header of PROXY_HEADERS) {
     const value = request.headers.get(header)
     if (value) {
       headers.set(header, value)
@@ -36,11 +38,23 @@ function proxyHeaders(request: Request) {
   return headers
 }
 
-function responseHeaders(headers: Headers) {
+function responseHeaders(headers: Headers, request: Request) {
   const responseHeaders = new Headers(headers)
 
   for (const header of HOP_BY_HOP_HEADERS) {
     responseHeaders.delete(header)
+  }
+
+  const corsResponseHeaders = corsHeaders(request)
+  const varyHeader = corsResponseHeaders.get("vary")
+  corsResponseHeaders.delete("vary")
+
+  for (const [header, value] of corsResponseHeaders) {
+    responseHeaders.set(header, value)
+  }
+
+  if (varyHeader) {
+    appendVaryHeader(responseHeaders, varyHeader)
   }
 
   return responseHeaders
@@ -63,11 +77,19 @@ async function proxyMediaMtxRequest(request: Request, context: { params: Promise
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers: responseHeaders(response.headers),
+    headers: responseHeaders(response.headers, request),
+  })
+}
+
+export function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(request),
   })
 }
 
 export const GET = proxyMediaMtxRequest
+export const HEAD = proxyMediaMtxRequest
 export const POST = proxyMediaMtxRequest
 export const PUT = proxyMediaMtxRequest
 export const PATCH = proxyMediaMtxRequest

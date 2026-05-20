@@ -48,6 +48,7 @@ DASHBOARD_PORT=3000
 NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
 MEDIAMTX_API_URL=http://publisher:9997
 NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://localhost/hls
+MEDIAMTX_PROXY_ALLOWED_ORIGINS=
 
 # MediaMTX Ports
 RTSP_PORT=8554
@@ -61,6 +62,8 @@ METRICS_PORT=9998
 MEDIAMTX_USERNAME=admin
 MEDIAMTX_PASSWORD=adminpass
 \`\`\`
+
+`MEDIAMTX_PROXY_ALLOWED_ORIGINS` is optional. Leave it empty for the default same-origin `/api/mediamtx` proxy behavior, or set a comma-separated list of exact browser origins when a separate dashboard origin must call the proxy.
 
 ### MediaMTX Configuration
 
