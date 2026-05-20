@@ -63,9 +63,9 @@ services:
     volumes:
       - ./mediamtx.yml:/mediamtx.yml:ro
     environment:
-      - MTX_RTSPTRANSPORTS=tcp
-      - MTX_WEBRTCADDITIONALHOSTS="localhost"
-        #- MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN=*
+      MTX_RTSPTRANSPORTS: tcp
+      MTX_WEBRTCADDITIONALHOSTS: localhost
+      # MTX_PROTOCOLS_WEBRTC_ALLOWORIGIN: "*"
     ports:
       - "9998:9998"
       - "9999:9999"
