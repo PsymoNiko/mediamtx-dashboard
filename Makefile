@@ -4,6 +4,7 @@
 # Default value; can be overridden on the command line:
 #   make pnpm-dev LOCALHOST=127.0.0.1
 LOCALHOST ?= localhost
+DOCKER_COMPOSE ?= $(shell if docker compose version >/dev/null 2>&1; then printf 'docker compose'; elif command -v docker-compose >/dev/null 2>&1; then printf 'docker-compose'; else printf 'docker compose'; fi)
 
 # -------------------------------------------------
 # Help
@@ -13,7 +14,7 @@ help: ## Show this help message
 	@echo 'Usage: make [target] [VARIABLE=value]'
 	@echo ''
 	@echo 'Available targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-25s %s\n", $1, $2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-25s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # -------------------------------------------------
 # pnpm‑specific commands
@@ -34,14 +35,14 @@ pnpm-test: ## Test pnpm build locally
 	@echo "✅ Local build successful!"
 
 pnpm-build: ## Build Docker image with pnpm
-	docker-compose build --no-cache
+	$(DOCKER_COMPOSE) build --no-cache
 
 pnpm-build-dev: ## Build development image with pnpm
-	docker-compose -f docker-compose.dev.yml build --no-cache
+	$(DOCKER_COMPOSE) -f docker-compose.dev.yml build --no-cache
 
-pnpm-dev: export LOCALHOST=$(LOCALHOST) ## Start in development mode with hot‑reload
+pnpm-dev: ## Start in development mode with hot‑reload
 	@echo "🚀 Running with LOCALHOST=$(LOCALHOST)"
-	docker-compose -f docker-compose.dev.yml up
+	LOCALHOST=$(LOCALHOST) $(DOCKER_COMPOSE) -f docker-compose.dev.yml up
 
 pnpm-clean: ## Clean pnpm cache and lockfile
 	rm -rf node_modules .next pnpm-lock.yaml
@@ -56,27 +57,27 @@ pnpm-clean: ## Clean pnpm cache and lockfile
 build: pnpm-setup pnpm-build ## Build production images
 
 up: ## Start all services
-	docker-compose up -d
+	$(DOCKER_COMPOSE) up -d
 
 down: ## Stop all services
-	docker-compose down
-	docker-compose -f docker-compose.dev.yml down 2>/dev/null || true
+	$(DOCKER_COMPOSE) down
+	$(DOCKER_COMPOSE) -f docker-compose.dev.yml down 2>/dev/null || true
 
 restart: ## Restart all services
-	docker-compose restart
+	$(DOCKER_COMPOSE) restart
 
 logs: ## Show logs from all services
-	docker-compose logs -f
+	$(DOCKER_COMPOSE) logs -f
 
 logs-dashboard: ## Show logs from dashboard only
-	docker-compose logs -f dashboard
+	$(DOCKER_COMPOSE) logs -f dashboard
 
 logs-mediamtx: ## Show logs from MediaMTX only
-	docker-compose logs -f mediamtx
+	$(DOCKER_COMPOSE) logs -f mediamtx
 
 clean: ## Clean up everything
-	docker-compose down -v
-	docker-compose -f docker-compose.dev.yml down -v 2>/dev/null || true
+	$(DOCKER_COMPOSE) down -v
+	$(DOCKER_COMPOSE) -f docker-compose.dev.yml down -v 2>/dev/null || true
 	$(MAKE) pnpm-clean
 	docker system prune -f
 
@@ -89,13 +90,13 @@ rebuild: ## Full rebuild with pnpm
 dev: pnpm-build-dev pnpm-dev ## Start in development mode
 
 shell-dashboard: ## Open shell in dashboard container
-	docker-compose exec dashboard sh
+	$(DOCKER_COMPOSE) exec dashboard sh
 
 shell-mediamtx: ## Open shell in MediaMTX container
-	docker-compose exec mediamtx sh
+	$(DOCKER_COMPOSE) exec mediamtx sh
 
 ps: ## Show running containers
-	docker-compose ps
+	$(DOCKER_COMPOSE) ps
 
 health: ## Check service health
 	@echo "Checking services..."
@@ -104,7 +105,7 @@ health: ## Check service health
 
 status: ## Show detailed status
 	@echo "=== Docker Containers ==="
-	@docker-compose ps
+	@$(DOCKER_COMPOSE) ps
 	@echo ""
 	@echo "=== Docker Images ==="
 	@docker images | grep -E "mediamtx|REPOSITORY"
