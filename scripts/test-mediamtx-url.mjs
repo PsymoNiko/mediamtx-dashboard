@@ -23,8 +23,23 @@ assert.equal(
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const debianDockerfile = fs.readFileSync("Dockerfile.debian", "utf8")
+const prodDockerfile = fs.readFileSync("Dockerfile.prod", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(!prodDockerfile.includes("192.168.50.11"))
+assert.match(prodDockerfile, /ARG NEXT_PUBLIC_MEDIAMTX_HLS_URL="http:\/\/localhost:80\/hls"/)
+assert.ok(!debianDockerfile.includes('NEXT_PUBLIC_MEDIAMTX_HLS_URL="http://localhost:8888"'))
+assert.equal(
+  (debianDockerfile.match(/NEXT_PUBLIC_MEDIAMTX_HLS_URL="http:\/\/localhost:8888\/hls"/g) || []).length,
+  2,
+)
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost:8888}"))
+assert.equal(
+  (prodCompose.match(/NEXT_PUBLIC_MEDIAMTX_HLS_URL=\$\{NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http:\/\/localhost:8888\/hls\}/g) || [])
+    .length,
+  2,
+)
