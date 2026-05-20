@@ -4,6 +4,12 @@ echo "🔍 MediaMTX Docker Troubleshooting"
 echo "=================================="
 echo ""
 
+COMPOSE_CMD=()
+
+format_compose_cmd() {
+    printf "%s" "${COMPOSE_CMD[*]}"
+}
+
 # Check Docker
 echo "1. Checking Docker installation..."
 if command -v docker &> /dev/null; then
@@ -17,9 +23,14 @@ fi
 echo ""
 echo "2. Checking Docker Compose..."
 if command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD=(docker-compose)
     echo "   ✅ Docker Compose is installed: $(docker-compose --version)"
+elif docker compose version &> /dev/null; then
+    COMPOSE_CMD=(docker compose)
+    echo "   ✅ Docker Compose is installed: $(docker compose version)"
 else
     echo "   ❌ Docker Compose is not installed"
+    echo "   Install Docker Compose v2 or legacy docker-compose, then re-run this script"
     exit 1
 fi
 
@@ -30,7 +41,7 @@ if ping -c 1 dl-cdn.alpinelinux.org &> /dev/null; then
     echo "   ✅ Can reach Alpine package servers"
 else
     echo "   ⚠️  Cannot reach Alpine servers (will use Debian image)"
-    echo "   Run: docker-compose build --build-arg DOCKERFILE=Dockerfile.debian"
+    echo "   Run: $(format_compose_cmd) build --build-arg DOCKERFILE=Dockerfile.debian"
 fi
 
 # Check ports
@@ -45,15 +56,45 @@ for port in "${ports[@]}"; do
     fi
 done
 
+# Check authenticated MediaMTX API path when the stack is already running
+echo ""
+echo "5. Checking MediaMTX API with configured credentials..."
+if ! command -v curl &> /dev/null; then
+    echo "   ⚠️  curl is not installed; skipping API credential check"
+else
+    api_port="${API_PORT:-9997}"
+    mediamtx_username="${MEDIAMTX_USERNAME:-admin}"
+    mediamtx_password="${MEDIAMTX_PASSWORD:-adminpass}"
+    api_url="http://localhost:${api_port}/v3/config/global/get"
+    http_status=$(curl -sS -o /dev/null -w "%{http_code}" -u "${mediamtx_username}:${mediamtx_password}" "$api_url" 2>/dev/null || true)
+
+    case "$http_status" in
+        200)
+            echo "   ✅ MediaMTX API accepts credentials for user '${mediamtx_username}'"
+            ;;
+        000)
+            echo "   ⚠️  MediaMTX API is not reachable at $api_url"
+            echo "   Start the stack with: $(format_compose_cmd) up -d"
+            ;;
+        401|403)
+            echo "   ❌ MediaMTX API rejected credentials for user '${mediamtx_username}'"
+            echo "   Check MEDIAMTX_USERNAME/MEDIAMTX_PASSWORD and the login form defaults"
+            ;;
+        *)
+            echo "   ⚠️  MediaMTX API returned HTTP $http_status at $api_url"
+            ;;
+    esac
+fi
+
 # Check disk space
 echo ""
-echo "5. Checking disk space..."
+echo "6. Checking disk space..."
 available=$(df -h . | awk 'NR==2 {print $4}')
 echo "   Available space: $available"
 
 # Try building
 echo ""
-echo "6. Attempting to build..."
+echo "7. Attempting to build..."
 echo "   Testing Alpine build..."
 if docker build -f Dockerfile -t mediamtx-test:alpine . &> /dev/null; then
     echo "   ✅ Alpine build successful"
