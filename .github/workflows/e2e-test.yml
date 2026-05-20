@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -35,7 +36,7 @@ jobs:
         run: |
           pnpm start &  # runs on port 3000 by default
           sleep 10
-          curl -f http://localhost:3000/api/streams || exit 1
+          curl -f http://localhost:3000/api/mediamtx/v3/config/global/get || exit 1
 
       - name: Logs on failure
         if: failure()

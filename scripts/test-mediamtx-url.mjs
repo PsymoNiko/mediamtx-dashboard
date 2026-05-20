@@ -24,7 +24,13 @@ assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://l
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
+const dashboardPage = fs.readFileSync("app/page.tsx", "utf8")
+const e2eWorkflow = fs.readFileSync(".github/workflows/e2e-test.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(!dashboardPage.includes('value="adminpass"'))
+assert.ok(e2eWorkflow.includes("pnpm/action-setup@v3"))
+assert.ok(!e2eWorkflow.includes("/api/streams"))
+assert.ok(e2eWorkflow.includes("/api/mediamtx/v3/config/global/get"))
