@@ -14,11 +14,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 ])
 
 function normalizeUpstreamApiUrl() {
-  const configuredUrl =
-    process.env.MEDIAMTX_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
-    DEFAULT_UPSTREAM_API_URL
+  const configuredUrl = process.env.MEDIAMTX_API_URL || DEFAULT_UPSTREAM_API_URL
 
   return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
 }
