@@ -19,18 +19,33 @@ export function StreamPlayer({ pathName }: StreamPlayerProps) {
     if (!video) return
 
     const hlsUrl = buildMediaMtxHlsUrl(pathName)
+    let disposed = false
 
     setIsLoading(true)
     setError(null)
 
     // Check if HLS is natively supported (Safari)
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = hlsUrl
-      video.addEventListener("loadedmetadata", () => setIsLoading(false))
-      video.addEventListener("error", () => {
+      const handleLoadedMetadata = () => {
+        if (!disposed) setIsLoading(false)
+      }
+      const handleNativeError = () => {
+        if (disposed) return
         setError("Failed to load stream")
         setIsLoading(false)
-      })
+      }
+
+      video.src = hlsUrl
+      video.addEventListener("loadedmetadata", handleLoadedMetadata)
+      video.addEventListener("error", handleNativeError)
+
+      return () => {
+        disposed = true
+        video.removeEventListener("loadedmetadata", handleLoadedMetadata)
+        video.removeEventListener("error", handleNativeError)
+        video.removeAttribute("src")
+        video.load()
+      }
     } else if (Hls.isSupported()) {
       // Use HLS.js for browsers that don't support HLS natively
       const hls = new Hls({
@@ -44,6 +59,7 @@ export function StreamPlayer({ pathName }: StreamPlayerProps) {
       hls.attachMedia(video)
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (disposed) return
         setIsLoading(false)
         video.play().catch((err) => {
           console.warn("Autoplay prevented:", err)
@@ -51,6 +67,7 @@ export function StreamPlayer({ pathName }: StreamPlayerProps) {
       })
 
       hls.on(Hls.Events.ERROR, (event, data) => {
+        if (disposed) return
         console.error("HLS error:", data)
         if (data.fatal) {
           setError(`Streaming error: ${data.type}`)
@@ -63,6 +80,7 @@ export function StreamPlayer({ pathName }: StreamPlayerProps) {
     }
 
     return () => {
+      disposed = true
       if (hlsRef.current) {
         hlsRef.current.destroy()
         hlsRef.current = null
