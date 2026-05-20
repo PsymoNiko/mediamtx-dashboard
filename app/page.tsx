@@ -91,6 +91,14 @@ function MediaMTXDashboard() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const handleAuthError = (error: unknown) => {
+    if (!api.isMediaMtxAuthError(error)) return false
+
+    clearAuth()
+    router.push("/login")
+    return true
+  }
+
   const fetchPaths = async () => {
     setIsLoadingPaths(true)
     try {
@@ -98,6 +106,7 @@ function MediaMTXDashboard() {
       setPaths(configs.filter((p) => p.name !== "all_others"))
       setLivePaths(live)
     } catch (error) {
+      if (handleAuthError(error)) return
       console.error("Error fetching paths:", error)
       alert("Failed to load paths")
     } finally {
@@ -127,6 +136,7 @@ function MediaMTXDashboard() {
       setEditingPath(null)
       alert("Path updated successfully!")
     } catch (error) {
+      if (handleAuthError(error)) return
       console.error("Error updating path:", error)
       alert(`Failed to update path: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {
@@ -145,6 +155,7 @@ function MediaMTXDashboard() {
       setPathToDelete(null)
       alert("Path deleted successfully!")
     } catch (error) {
+      if (handleAuthError(error)) return
       console.error("Error deleting path:", error)
       alert(`Failed to delete path: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {
@@ -208,6 +219,7 @@ function MediaMTXDashboard() {
       setIsAddPathDialogOpen(false)
       alert("Path added successfully!")
     } catch (error) {
+      if (handleAuthError(error)) return
       console.error("Error adding path:", error)
       alert(`Error adding path: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {

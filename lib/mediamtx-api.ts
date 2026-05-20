@@ -1,5 +1,8 @@
 import { getAuthHeader } from "./auth"
+import { MediaMtxApiError, isMediaMtxAuthError } from "./mediamtx-errors.mjs"
 import { buildMediaMtxApiUrl } from "./mediamtx-url.mjs"
+
+export { isMediaMtxAuthError }
 
 export interface PathConfig {
   name: string
@@ -59,7 +62,12 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     try {
       errorText = await response.text()
     } catch {}
-    throw new Error(errorText || `API request failed: ${response.status} ${response.statusText}`)
+    throw new MediaMtxApiError(
+      errorText || `API request failed: ${response.status} ${response.statusText}`,
+      response.status,
+      response.statusText,
+      errorText,
+    )
   }
 
   if (response.status === 204) return null
