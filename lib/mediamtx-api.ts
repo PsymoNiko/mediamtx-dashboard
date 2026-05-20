@@ -1,5 +1,6 @@
 import { getAuthHeader } from "./auth"
 import { buildMediaMtxApiUrl } from "./mediamtx-url.mjs"
+import { buildMediaMtxListEndpoint, shouldFetchNextMediaMtxListPage } from "./mediamtx-pagination.mjs"
 
 export interface PathConfig {
   name: string
@@ -38,6 +39,12 @@ export interface Path {
   bytesReceived: number
   bytesSent: number
   readers: PathReader[]
+}
+
+interface MediaMtxListResponse<T> {
+  pageCount?: number
+  itemCount?: number
+  items?: T[]
 }
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
@@ -79,14 +86,32 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return text
 }
 
+async function fetchAllListItems<T>(endpoint: string): Promise<T[]> {
+  const items: T[] = []
+  let page = 0
+
+  while (true) {
+    const data = (await fetchAPI(buildMediaMtxListEndpoint(endpoint, page))) as MediaMtxListResponse<T> | null
+    const pageItems = data?.items
+
+    if (Array.isArray(pageItems)) {
+      items.push(...pageItems)
+    }
+
+    if (!shouldFetchNextMediaMtxListPage(data, page)) {
+      return items
+    }
+
+    page += 1
+  }
+}
+
 export async function getPathConfigs(): Promise<PathConfig[]> {
-  const data = await fetchAPI("/v3/config/paths/list")
-  return data.items || []
+  return fetchAllListItems<PathConfig>("/v3/config/paths/list")
 }
 
 export async function getPaths(): Promise<Path[]> {
-  const data = await fetchAPI("/v3/paths/list")
-  return data.items || []
+  return fetchAllListItems<Path>("/v3/paths/list")
 }
 
 export async function addPath(config: PathConfig): Promise<void> {
@@ -163,4 +188,3 @@ export async function deletePath(name: string): Promise<void> {
     method: "DELETE",
   })
 }
-
