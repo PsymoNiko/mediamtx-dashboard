@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
 
+import { loginErrorMessageForResponse } from "../lib/mediamtx-login.mjs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
@@ -21,6 +22,25 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+
+assert.equal(loginErrorMessageForResponse(401), "Invalid username or password")
+assert.equal(loginErrorMessageForResponse(403), "Invalid username or password")
+assert.equal(
+  loginErrorMessageForResponse(502),
+  "MediaMTX API is unavailable. Wait for Docker services to finish starting, then try again.",
+)
+assert.equal(
+  loginErrorMessageForResponse(504),
+  "MediaMTX API is unavailable. Wait for Docker services to finish starting, then try again.",
+)
+assert.equal(
+  loginErrorMessageForResponse(
+    502,
+    "Bad Gateway",
+    JSON.stringify({ message: "The dashboard could not reach the MediaMTX API upstream." }),
+  ),
+  "The dashboard could not reach the MediaMTX API upstream.",
+)
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
