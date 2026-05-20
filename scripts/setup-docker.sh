@@ -1,16 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
-echo "🔧 Setting up Docker build environment..."
+echo "🔧 Setting up Docker build environment with pnpm..."
 echo ""
-
-# Check if package-lock.json exists
-if [ ! -f "package-lock.json" ]; then
-    echo "📦 package-lock.json not found, generating..."
-    npm install --package-lock-only
-    echo "✅ package-lock.json created"
-else
-    echo "✅ package-lock.json exists"
-fi
 
 # Verify package.json
 if [ -f "package.json" ]; then
@@ -20,10 +12,32 @@ else
     exit 1
 fi
 
-# Clean npm cache
+# Ensure pnpm is available for lockfile maintenance
+if ! command -v pnpm >/dev/null 2>&1; then
+    echo "📦 pnpm not found, enabling with corepack..."
+    if command -v corepack >/dev/null 2>&1; then
+        corepack enable
+    fi
+fi
+
+if ! command -v pnpm >/dev/null 2>&1; then
+    echo "📦 corepack did not provide pnpm, installing pnpm globally..."
+    npm install -g pnpm
+fi
+
+# Check if pnpm-lock.yaml exists
+if [ ! -f "pnpm-lock.yaml" ]; then
+    echo "📦 pnpm-lock.yaml not found, generating..."
+    pnpm install --lockfile-only
+    echo "✅ pnpm-lock.yaml created"
+else
+    echo "✅ pnpm-lock.yaml exists"
+fi
+
+# Clean pnpm store metadata when available
 echo ""
-echo "🧹 Cleaning npm cache..."
-npm cache clean --force
+echo "🧹 Pruning pnpm store..."
+pnpm store prune || true
 
 # Remove node_modules if exists
 if [ -d "node_modules" ]; then
