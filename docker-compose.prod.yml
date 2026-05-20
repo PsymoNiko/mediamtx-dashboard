@@ -33,13 +33,13 @@ services:
       args:
         - NODE_ENV=production
         - NEXT_PUBLIC_MEDIAMTX_API_URL=${NEXT_PUBLIC_MEDIAMTX_API_URL:-/api/mediamtx}
-        - NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost:8888}
+        - NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost:8888/hls}
     container_name: mediamtx-dashboard
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_MEDIAMTX_API_URL=${NEXT_PUBLIC_MEDIAMTX_API_URL:-/api/mediamtx}
-      - NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost:8888}
+      - NEXT_PUBLIC_MEDIAMTX_HLS_URL=${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost:8888/hls}
       - MEDIAMTX_API_URL=http://mediamtx:9997
       - NODE_ENV=production
     depends_on:
