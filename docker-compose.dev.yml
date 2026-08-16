@@ -7,7 +7,7 @@ x-restart-policy: &restart_policy
   restart: unless-stopped
 
 x-pull-policy: &pull_policy
-  pull_policy: never          # Use local images only (adjust or remove as needed)
+  pull_policy: missing        # Pull images on fresh clones, reuse local images when present.
 
 x-depends_on-healthy: &depends_on_healthy
   condition: service_healthy
