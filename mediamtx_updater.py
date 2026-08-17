@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import os
 import requests
 import json
 import time
@@ -7,21 +8,50 @@ import sys
 from requests.auth import HTTPBasicAuth
 
 # Configuration
-MEDIAMTX_API_URL = "http://localhost:9997/v3/config/paths/list"
-MEDIAMTX_CONFIG_PATH = "./mediamtx.yml"  # Update this to your actual path
-MEDIAMTX_USERNAME = "admin"
-MEDIAMTX_PASSWORD = "adminpass"
-UPDATE_INTERVAL = 60  # seconds
+DEFAULT_MEDIAMTX_API_URL = "http://localhost:9997"
+MEDIAMTX_PATHS_ENDPOINT = "/v3/config/paths/list"
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('mediamtx_updater.log'),
-        logging.StreamHandler()
-    ]
-)
+
+def build_mediamtx_paths_url(api_url):
+    """Accept either a MediaMTX API base URL or the full paths endpoint."""
+    normalized_url = (api_url or "").strip().rstrip("/") or DEFAULT_MEDIAMTX_API_URL
+
+    if normalized_url.endswith(MEDIAMTX_PATHS_ENDPOINT):
+        return normalized_url
+
+    if normalized_url.endswith("/v3/config"):
+        normalized_url = normalized_url.removesuffix("/v3/config")
+    elif normalized_url.endswith("/v3"):
+        normalized_url = normalized_url.removesuffix("/v3")
+
+    return f"{normalized_url}{MEDIAMTX_PATHS_ENDPOINT}"
+
+
+def parse_update_interval(value, default=60):
+    try:
+        interval = int(value)
+    except (TypeError, ValueError):
+        return default
+
+    return interval if interval > 0 else default
+
+
+MEDIAMTX_API_URL = build_mediamtx_paths_url(os.getenv("MEDIAMTX_API_URL"))
+MEDIAMTX_CONFIG_PATH = os.getenv("MEDIAMTX_CONFIG_PATH", "./mediamtx.yml")
+MEDIAMTX_USERNAME = os.getenv("MEDIAMTX_USERNAME", "admin")
+MEDIAMTX_PASSWORD = os.getenv("MEDIAMTX_PASSWORD", "adminpass")
+UPDATE_INTERVAL = parse_update_interval(os.getenv("MEDIAMTX_UPDATE_INTERVAL"))
+
+
+def configure_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('mediamtx_updater.log'),
+            logging.StreamHandler()
+        ]
+    )
 
 def debug_response_structure(config_data):
     """Debug function to understand the response structure"""
@@ -255,6 +285,8 @@ def check_mediamtx_connectivity():
         return False
 
 def main():
+    configure_logging()
+
     # First, check connectivity
     logging.info("MediaMTX Configuration Updater started")
     logging.info(f"Using username: {MEDIAMTX_USERNAME}")
