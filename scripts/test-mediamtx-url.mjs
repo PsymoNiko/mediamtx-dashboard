@@ -5,6 +5,7 @@ import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
   normalizeMediaMtxApiBaseUrl,
+  redactMediaMtxSourceUrl,
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
@@ -21,6 +22,15 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+assert.equal(
+  redactMediaMtxSourceUrl("rtsp://admin:Admin1234@192.168.50.50/live"),
+  "rtsp://[redacted]@192.168.50.50/live",
+)
+assert.equal(
+  redactMediaMtxSourceUrl("rtsps://camera-user@camera.example.com/stream"),
+  "rtsps://[redacted]@camera.example.com/stream",
+)
+assert.equal(redactMediaMtxSourceUrl("publisher"), "publisher")
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
