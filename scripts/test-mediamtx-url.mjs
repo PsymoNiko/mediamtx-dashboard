@@ -6,6 +6,7 @@ import {
   buildMediaMtxHlsUrl,
   normalizeMediaMtxApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
+import { buildLoginCredentialAttempts } from "../lib/login-credentials.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/"), "http://localhost:9997")
@@ -21,6 +22,12 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+
+assert.deepEqual(buildLoginCredentialAttempts("admin", "adminpass"), [{ username: "admin", password: "adminpass" }])
+assert.deepEqual(buildLoginCredentialAttempts(" admin ", "adminpass\n"), [
+  { username: " admin ", password: "adminpass\n" },
+  { username: "admin", password: "adminpass" },
+])
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
