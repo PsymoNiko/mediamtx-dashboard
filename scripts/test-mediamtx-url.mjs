@@ -21,6 +21,14 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+assert.equal(
+  buildMediaMtxHlsUrl("front door", "http://localhost/hls/"),
+  "http://localhost/hls/front%20door/index.m3u8",
+)
+assert.equal(
+  buildMediaMtxHlsUrl("garage/camera#1?test", "http://localhost/hls/"),
+  "http://localhost/hls/garage/camera%231%3Ftest/index.m3u8",
+)
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
