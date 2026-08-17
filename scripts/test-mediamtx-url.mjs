@@ -5,6 +5,7 @@ import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
   normalizeMediaMtxApiBaseUrl,
+  normalizeMediaMtxUpstreamApiUrl,
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
@@ -21,6 +22,30 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+
+assert.equal(
+  normalizeMediaMtxUpstreamApiUrl({
+    serverApiUrl: "",
+    legacyServerApiUrl: "",
+    publicApiUrl: "/api/mediamtx",
+  }),
+  "http://localhost:9997",
+)
+assert.equal(
+  normalizeMediaMtxUpstreamApiUrl({
+    serverApiUrl: "http://mediamtx:9997/v3/config",
+    publicApiUrl: "/api/mediamtx",
+  }),
+  "http://mediamtx:9997",
+)
+assert.equal(
+  normalizeMediaMtxUpstreamApiUrl({
+    serverApiUrl: "",
+    legacyServerApiUrl: "",
+    publicApiUrl: "http://localhost:9997/v3",
+  }),
+  "http://localhost:9997",
+)
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
