@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx-server-dev
+    ports:
+      - "8554:8554"
+      - "1935:1935"
+      - "8888:8888"
+      - "8889:8889"
+      - "9997:9997"
+      - "9998:9998"
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
+      - ./recordings:/recordings
+    environment:
+      - MTX_PROTOCOLS=tcp
+    networks:
+      - mediamtx-network
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mediamtx-dashboard-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - mediamtx
+    networks:
+      - mediamtx-network
+
+networks:
+  mediamtx-network:
+    driver: bridge

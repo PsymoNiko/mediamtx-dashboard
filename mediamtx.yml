@@ -1,0 +1,129 @@
+################################################
+# MediaMTX Configuration for Docker
+################################################
+
+# Log level
+logLevel: info
+logDestinations: [stdout]
+
+# Timeouts
+readTimeout: 10s
+writeTimeout: 10s
+writeQueueSize: 512
+
+authMethod: internal
+authInternalUsers:
+  - user: any
+    pass:
+    ips: []
+    permissions:
+      - action: publish
+      - action: read
+      - action: playback
+  - user: admin
+    pass: adminpass
+    ips: []
+    permissions:
+      - action: api
+      - action: metrics
+      - action: pprof
+# Authentication
+#authMethod: internal
+#authInternalUsers:
+#  - user: admin
+#    pass: adminpass
+#    ips: []
+#    permissions:
+#      - action: publish
+#        path:
+#      - action: read
+#        path:
+#      - action: playback
+#        path:
+#  - user: admin
+#    pass: adminpass
+#    ips: ['127.0.0.1', '::1']
+#    permissions:
+#      - action: api
+#      - action: metrics
+#      - action: pprof
+
+# API
+api: yes
+apiAddress: :9997
+apiEncryption: no
+apiAllowOrigin: '*'
+
+# Metrics
+metrics: yes
+metricsAddress: :9998
+metricsEncryption: no
+metricsAllowOrigin: '*'
+
+# RTSP
+rtsp: yes
+rtspTransports: [udp, tcp]
+rtspEncryption: "no"
+rtspAddress: :8554
+
+# RTMP
+rtmp: yes
+rtmpAddress: :1935
+rtmpEncryption: "no"
+
+# HLS
+hls: yes
+hlsAddress: :8888
+hlsEncryption: no
+hlsAllowOrigin: '*'
+hlsAlwaysRemux: no
+hlsVariant: lowLatency
+hlsSegmentCount: 7
+hlsSegmentDuration: 1s
+hlsPartDuration: 200ms
+hlsSegmentMaxSize: 50M
+hlsDirectory: ''
+
+# WebRTC
+webrtc: yes
+webrtcAddress: :8889
+webrtcEncryption: no
+webrtcAllowOrigin: '*'
+webrtcLocalUDPAddress: :8189
+webrtcIPsFromInterfaces: yes
+webrtcICEServers2: []
+
+# SRT
+srt: yes
+srtAddress: :8890
+
+# Path defaults
+pathDefaults:
+  source: publisher
+  sourceOnDemand: no
+  sourceOnDemandStartTimeout: 10s
+  sourceOnDemandCloseAfter: 10s
+  maxReaders: 0
+  record: no
+  recordPath: /recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+  recordFormat: fmp4
+  recordPartDuration: 1s
+  recordSegmentDuration: 1h
+  recordDeleteAfter: 24h
+  overridePublisher: yes
+
+# Paths
+paths:
+  cam1:
+    source: rtsp://admin:N0vin-123PNR@192.168.50.27
+  camera2:
+    source: rtsp://admin:N0vin-123PNR@192.168.50.27
+  camera3:
+    source: rtsp://admin:N0vin-123PNR@192.168.50.27
+  camera4:
+    source: rtsp://admin:admin1234@192.168.50.3
+  camera5:
+    source: rtsp://admin:N0vin-123PNR@192.168.50.27
+  camera6:
+    source: rtsp://admin:N0vin-123PNR@192.168.50.26
+  all_others:
