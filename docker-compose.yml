@@ -80,6 +80,12 @@ services:
     stdin_open: true
     networks:
       - mediamtx_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "--header", "Authorization: Basic YWRtaW46YWRtaW5wYXNz", "http://localhost:9997/v3/config/global/get"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   dashboard:
     image: psymoniko/mediamtx-dashboard:latest
@@ -93,7 +99,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - publisher
+      publisher:
+        condition: service_healthy
     restart: unless-stopped
     env_file:
       - ./.env
