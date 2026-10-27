@@ -15,7 +15,7 @@ services:
       - ./mediamtx.yml:/mediamtx.yml
       - ./recordings:/recordings
     environment:
-      - MTX_PROTOCOLS=tcp
+      - MTX_RTSPTRANSPORTS=tcp
     networks:
       - mediamtx-network
 
