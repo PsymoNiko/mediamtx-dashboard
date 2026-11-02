@@ -4,6 +4,15 @@
 
 set -e
 
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+  COMPOSE=(docker-compose)
+else
+  echo "Docker Compose is required. Install Docker Compose v2 or docker-compose."
+  exit 1
+fi
+
 echo "🚀 MediaMTX Dashboard - pnpm Docker Manager"
 echo ""
 
@@ -16,17 +25,17 @@ case "$1" in
   
   build)
     echo "Building with pnpm..."
-    docker-compose build --no-cache
+    "${COMPOSE[@]}" build --no-cache
     ;;
   
   build-dev)
     echo "Building development image with pnpm..."
-    docker-compose -f docker-compose.dev.yml build --no-cache
+    "${COMPOSE[@]}" -f docker-compose.dev.yml build --no-cache
     ;;
   
   start)
     echo "Starting services..."
-    docker-compose up -d
+    "${COMPOSE[@]}" up -d
     echo "✅ Services started!"
     echo "Dashboard: http://localhost:3000"
     echo "MediaMTX API: http://localhost:9997"
@@ -34,32 +43,32 @@ case "$1" in
   
   dev)
     echo "Starting in development mode with hot-reload..."
-    docker-compose -f docker-compose.dev.yml up
+    "${COMPOSE[@]}" -f docker-compose.dev.yml up
     ;;
   
   stop)
     echo "Stopping services..."
-    docker-compose down
-    docker-compose -f docker-compose.dev.yml down 2>/dev/null || true
+    "${COMPOSE[@]}" down
+    "${COMPOSE[@]}" -f docker-compose.dev.yml down 2>/dev/null || true
     echo "✅ Services stopped!"
     ;;
   
   restart)
     echo "Restarting services..."
-    docker-compose restart
+    "${COMPOSE[@]}" restart
     echo "✅ Services restarted!"
     ;;
   
   logs)
     echo "Showing logs (Ctrl+C to exit)..."
-    docker-compose logs -f "${2:-}"
+    "${COMPOSE[@]}" logs -f "${2:-}"
     ;;
   
   clean)
     echo "Cleaning up..."
-    docker-compose down -v
-    docker-compose -f docker-compose.dev.yml down -v 2>/dev/null || true
-    rm -rf node_modules .next pnpm-lock.yaml
+    "${COMPOSE[@]}" down -v
+    "${COMPOSE[@]}" -f docker-compose.dev.yml down -v 2>/dev/null || true
+    rm -rf node_modules .next
     docker system prune -f
     echo "✅ Cleanup complete!"
     ;;
@@ -75,9 +84,9 @@ case "$1" in
   
   shell)
     if [ "$2" = "dashboard" ]; then
-      docker-compose exec dashboard sh
+      "${COMPOSE[@]}" exec dashboard sh
     elif [ "$2" = "mediamtx" ]; then
-      docker-compose exec mediamtx sh
+      "${COMPOSE[@]}" exec mediamtx sh
     else
       echo "Usage: $0 shell [dashboard|mediamtx]"
       exit 1
@@ -92,7 +101,7 @@ case "$1" in
   
   status)
     echo "Service status:"
-    docker-compose ps
+    "${COMPOSE[@]}" ps
     echo ""
     echo "Docker images:"
     docker images | grep mediamtx
