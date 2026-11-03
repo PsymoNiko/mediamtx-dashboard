@@ -10,7 +10,7 @@ Prerequisites
 - Docker and Docker Compose v2 installed
 
 Files
-- .env (runtime + build values)
+- .env (optional override file for runtime + build values)
   - NEXT_PUBLIC_MEDIAMTX_API_URL=/api/mediamtx
   - MEDIAMTX_API_URL=http://<mediamtx-service-or-host>:9997
   - NEXT_PUBLIC_MEDIAMTX_HLS_URL=http://<host>:<port>/hls
@@ -19,15 +19,18 @@ Files
 
 Build and Run
 - Start stack and force rebuild when NEXT_PUBLIC_* changes:
+  docker compose up -d --build
+- If you want to override defaults through a local file, create `.env` and run:
   docker compose --env-file .env up -d --build
 
 Update Config
-- Edit .env with new values for NEXT_PUBLIC_MEDIAMTX_API_URL / NEXT_PUBLIC_MEDIAMTX_HLS_URL
+- Edit `.env` with new values for NEXT_PUBLIC_MEDIAMTX_API_URL / NEXT_PUBLIC_MEDIAMTX_HLS_URL
 - Rebuild and restart:
   docker compose --env-file .env up -d --build
 
 Notes
-- At runtime, env_file (./.env) still provides environment to the container, but client-side values come from build-time.
+- The default `docker-compose.yml` works without a local `.env`; runtime fallbacks are defined directly in compose.
+- If present, `./.env` is loaded as an optional override for local Docker runs, but client-side values still come from build-time.
 - If you prefer plain docker build:
   docker build \
     --build-arg NEXT_PUBLIC_MEDIAMTX_API_URL=$(grep ^NEXT_PUBLIC_MEDIAMTX_API_URL .env | cut -d= -f2-) \

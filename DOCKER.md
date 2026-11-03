@@ -26,6 +26,8 @@ docker-compose up -d
 make up
 \`\`\`
 
+The default compose file works without a local `.env`. Create one only if you want to override the built-in Docker defaults.
+
 ### 3. Access the services
 
 - **Dashboard**: http://localhost (via nginx) or http://localhost:3000
