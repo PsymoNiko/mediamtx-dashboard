@@ -5,12 +5,34 @@ import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
   normalizeMediaMtxApiBaseUrl,
+  normalizeMediaMtxServerApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/"), "http://localhost:9997")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3"), "http://localhost")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config"), "http://localhost")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config/global/get"), "http://localhost")
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({ publicApiUrl: "/api/mediamtx", serverApiUrl: undefined, legacyServerApiUrl: undefined }),
+  "http://localhost:9997",
+)
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "/api/mediamtx",
+    serverApiUrl: "http://publisher:9997/v3/config/global/get",
+    legacyServerApiUrl: undefined,
+  }),
+  "http://publisher:9997",
+)
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "http://browser.example/v3/config",
+    serverApiUrl: undefined,
+    legacyServerApiUrl: undefined,
+  }),
+  "http://browser.example",
+)
 
 assert.equal(
   buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx"),
