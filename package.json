@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "test": "node scripts/test-mediamtx-url.mjs",
+    "test": "node scripts/test-mediamtx-url.mjs && node scripts/test-pagination.mjs",
     "start": "next start"
   },
   "dependencies": {
