@@ -41,6 +41,7 @@ import {
 } from "lucide-react"
 import { ProtectedRoute } from "@/components/protected-route"
 import { clearAuth, getUsername } from "@/lib/auth"
+import { redactMediaMtxSourceUrl } from "@/lib/mediamtx-url.mjs"
 import { StreamPlayer } from "@/components/stream-player"
 import * as api from "@/lib/mediamtx-api"
 import type { PathConfig, Path as LivePath } from "@/lib/mediamtx-api"
@@ -366,7 +367,7 @@ function MediaMTXDashboard() {
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-500">{path.source}</p>
+                                <p className="text-sm text-gray-500">{redactMediaMtxSourceUrl(path.source)}</p>
                                 <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
                                   <span>{status.readers} viewers</span>
                                   {status.isLive && (
