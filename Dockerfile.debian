@@ -5,14 +5,19 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 
+ARG PNPM_VERSION=9
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
 # Install openssl for Prisma (if needed)
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/* && \
+    npm install -g pnpm@"${PNPM_VERSION}" --no-audit --no-fund
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-RUN npm ci
+RUN pnpm install --frozen-lockfile --reporter=silent
 
 # Stage 2: Builder
 FROM node:20-slim AS builder

@@ -23,10 +23,14 @@ assert.equal(
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const debianDockerfile = fs.readFileSync("Dockerfile.debian", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
 const devCompose = fs.readFileSync("docker-compose.dev.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(debianDockerfile.includes("pnpm-lock.yaml"))
+assert.ok(debianDockerfile.includes("pnpm install --frozen-lockfile"))
+assert.ok(!debianDockerfile.includes("npm ci"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(!devCompose.includes("pull_policy: never"))
