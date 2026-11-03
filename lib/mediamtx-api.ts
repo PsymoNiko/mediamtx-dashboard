@@ -1,4 +1,5 @@
 import { getAuthHeader } from "./auth"
+import { buildMediaMtxRequestHeaders } from "./mediamtx-request-headers.mjs"
 import { buildMediaMtxApiUrl } from "./mediamtx-url.mjs"
 
 export interface PathConfig {
@@ -42,14 +43,11 @@ export interface Path {
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const authHeader = getAuthHeader()
+  const headers = buildMediaMtxRequestHeaders(authHeader, options.headers, options.body !== undefined)
 
   const response = await fetch(buildMediaMtxApiUrl(endpoint), {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: authHeader,
-      ...options.headers,
-    },
+    headers,
   })
 
   const contentType = response.headers.get("content-type") || ""
@@ -163,4 +161,3 @@ export async function deletePath(name: string): Promise<void> {
     method: "DELETE",
   })
 }
-

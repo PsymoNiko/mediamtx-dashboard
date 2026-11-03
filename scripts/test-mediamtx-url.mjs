@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
 
+import { buildMediaMtxRequestHeaders } from "../lib/mediamtx-request-headers.mjs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
@@ -21,6 +22,24 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+
+{
+  const headers = buildMediaMtxRequestHeaders("Basic token", undefined, false)
+  assert.equal(headers.get("Authorization"), "Basic token")
+  assert.equal(headers.has("Content-Type"), false)
+}
+
+{
+  const headers = buildMediaMtxRequestHeaders("Basic token", undefined, true)
+  assert.equal(headers.get("Authorization"), "Basic token")
+  assert.equal(headers.get("Content-Type"), "application/json")
+}
+
+{
+  const headers = buildMediaMtxRequestHeaders("Basic token", { "Content-Type": "text/plain" }, true)
+  assert.equal(headers.get("Authorization"), "Basic token")
+  assert.equal(headers.get("Content-Type"), "text/plain")
+}
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
