@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Radio, AlertCircle } from "lucide-react"
+import { buildLoginCredentialAttempts } from "@/lib/login-credentials.mjs"
 import { buildMediaMtxApiUrl } from "@/lib/mediamtx-url.mjs"
 
 export default function LoginPage() {
@@ -22,26 +23,34 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Store credentials in sessionStorage
-      const credentials = btoa(`${username}:${password}`)
+      const attempts = buildLoginCredentialAttempts(username, password)
 
-      // Test the credentials by making a request to MediaMTX API
-      const response = await fetch(buildMediaMtxApiUrl("/v3/config/global/get"), {
-        headers: {
-          Authorization: `Basic ${credentials}`,
-        },
-      })
+      for (const attempt of attempts) {
+        const credentials = btoa(`${attempt.username}:${attempt.password}`)
 
-      if (response.ok) {
-        // Store credentials in sessionStorage
-        sessionStorage.setItem("mediamtx_auth", credentials)
-        sessionStorage.setItem("mediamtx_username", username)
+        // Test the credentials by making a request to MediaMTX API.
+        const response = await fetch(buildMediaMtxApiUrl("/v3/config/global/get"), {
+          headers: {
+            Authorization: `Basic ${credentials}`,
+          },
+        })
 
-        // Redirect to dashboard
-        router.push("/")
-      } else {
-        setError("Invalid username or password")
+        if (response.ok) {
+          // Store the exact credential variant that MediaMTX accepted.
+          sessionStorage.setItem("mediamtx_auth", credentials)
+          sessionStorage.setItem("mediamtx_username", attempt.username)
+
+          // Redirect to dashboard.
+          router.push("/")
+          return
+        }
+
+        if (response.status !== 401 && response.status !== 403) {
+          break
+        }
       }
+
+      setError("Invalid username or password")
     } catch (err) {
       setError("Failed to connect to MediaMTX server")
       console.error("Login error:", err)
