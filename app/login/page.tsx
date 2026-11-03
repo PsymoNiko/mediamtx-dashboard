@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Radio, AlertCircle } from "lucide-react"
+import { loginErrorMessageForResponse } from "@/lib/mediamtx-login.mjs"
 import { buildMediaMtxApiUrl } from "@/lib/mediamtx-url.mjs"
 
 export default function LoginPage() {
@@ -40,10 +41,11 @@ export default function LoginPage() {
         // Redirect to dashboard
         router.push("/")
       } else {
-        setError("Invalid username or password")
+        const responseText = await response.text().catch(() => "")
+        setError(loginErrorMessageForResponse(response.status, response.statusText, responseText))
       }
     } catch (err) {
-      setError("Failed to connect to MediaMTX server")
+      setError(loginErrorMessageForResponse(0, "", err instanceof Error ? err.message : ""))
       console.error("Login error:", err)
     } finally {
       setIsLoading(false)
