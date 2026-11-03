@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
 
+import { encodeBasicAuthCredentials } from "../lib/basic-auth.mjs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
@@ -21,6 +22,8 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+assert.equal(encodeBasicAuthCredentials("admin", "adminpass"), "YWRtaW46YWRtaW5wYXNz")
+assert.equal(encodeBasicAuthCredentials("admin", "pässwörd"), Buffer.from("admin:pässwörd", "utf8").toString("base64"))
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")

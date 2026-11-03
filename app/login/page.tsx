@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Radio, AlertCircle } from "lucide-react"
+import { encodeBasicAuthCredentials } from "@/lib/basic-auth.mjs"
 import { buildMediaMtxApiUrl } from "@/lib/mediamtx-url.mjs"
 
 export default function LoginPage() {
@@ -22,8 +23,8 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Store credentials in sessionStorage
-      const credentials = btoa(`${username}:${password}`)
+      // Encode credentials for the MediaMTX Basic auth request
+      const credentials = encodeBasicAuthCredentials(username, password)
 
       // Test the credentials by making a request to MediaMTX API
       const response = await fetch(buildMediaMtxApiUrl("/v3/config/global/get"), {
