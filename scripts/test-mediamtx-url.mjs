@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
 
+import { MediaMtxApiError, isMediaMtxAuthError } from "../lib/mediamtx-errors.mjs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
@@ -21,6 +22,11 @@ assert.equal(
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+
+assert.equal(isMediaMtxAuthError(new MediaMtxApiError("Unauthorized", 401)), true)
+assert.equal(isMediaMtxAuthError(new MediaMtxApiError("Forbidden", 403)), true)
+assert.equal(isMediaMtxAuthError(new MediaMtxApiError("Server error", 500)), false)
+assert.equal(isMediaMtxAuthError(new Error("Unauthorized")), false)
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
