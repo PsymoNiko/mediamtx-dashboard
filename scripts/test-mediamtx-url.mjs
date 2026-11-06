@@ -4,6 +4,7 @@ import fs from "node:fs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
+  fetchUpstreamMediaMtxWithRetry,
   normalizeMediaMtxApiBaseUrl,
   normalizeMediaMtxServerApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
@@ -66,3 +67,22 @@ assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:99
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(!devCompose.includes("pull_policy: never"))
 assert.ok(devCompose.includes("pull_policy: missing"))
+
+let attempts = 0
+const recoveredResponse = await fetchUpstreamMediaMtxWithRetry(
+  "http://publisher:9997/v3/config/global/get",
+  { method: "GET" },
+  {
+    maxAttempts: 4,
+    retryDelayMs: 1,
+    fetchImpl: async () => {
+      attempts += 1
+      if (attempts < 3) {
+        throw new TypeError("fetch failed: ECONNREFUSED")
+      }
+      return new Response(JSON.stringify({ ok: true }), { status: 200 })
+    },
+  },
+)
+assert.equal(attempts, 3)
+assert.equal(recoveredResponse.status, 200)

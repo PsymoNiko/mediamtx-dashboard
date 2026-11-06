@@ -1,4 +1,7 @@
-import { normalizeMediaMtxServerApiBaseUrl } from "@/lib/mediamtx-url.mjs"
+import {
+  fetchUpstreamMediaMtxWithRetry,
+  normalizeMediaMtxServerApiBaseUrl,
+} from "@/lib/mediamtx-url.mjs"
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -52,7 +55,7 @@ async function proxyMediaMtxRequest(request: Request, context: { params: Promise
   upstreamUrl.search = incomingUrl.search
 
   const method = request.method.toUpperCase()
-  const response = await fetch(upstreamUrl, {
+  const response = await fetchUpstreamMediaMtxWithRetry(upstreamUrl, {
     method,
     headers: proxyHeaders(request),
     body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
