@@ -5,12 +5,38 @@ import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
   normalizeMediaMtxApiBaseUrl,
+  normalizeMediaMtxServerApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/"), "http://localhost:9997")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3"), "http://localhost")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config"), "http://localhost")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config/global/get"), "http://localhost")
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "/api/mediamtx",
+    serverApiUrl: undefined,
+    legacyServerApiUrl: undefined,
+  }),
+  "http://localhost:9997",
+)
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "/api/mediamtx",
+    serverApiUrl: "http://publisher:9997/v3/config/global/get",
+    legacyServerApiUrl: undefined,
+  }),
+  "http://publisher:9997",
+)
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "http://browser.example/v3/config",
+    serverApiUrl: undefined,
+    legacyServerApiUrl: undefined,
+  }),
+  "http://browser.example",
+)
 
 assert.equal(
   buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx"),
@@ -23,10 +49,23 @@ assert.equal(
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const defaultCompose = fs.readFileSync("docker-compose.yml", "utf8")
+const localCompose = fs.readFileSync("docker-compose.local.yml", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
 const devCompose = fs.readFileSync("docker-compose.dev.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(!defaultCompose.includes("env_file:"))
+assert.ok(defaultCompose.includes("MEDIAMTX_API_URL: ${MEDIAMTX_API_URL:-http://publisher:9997}"))
+assert.ok(defaultCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL:-/api/mediamtx}"))
+assert.match(defaultCompose, /publisher:\r?\n[\s\S]*?healthcheck:/)
+assert.ok(defaultCompose.includes("Authorization: Basic YWRtaW46YWRtaW5wYXNz"))
+assert.match(defaultCompose, /depends_on:\r?\n\s+publisher:\r?\n\s+condition: service_healthy/)
+assert.ok(!localCompose.includes("MTX_PROTOCOLS=tcp"))
+assert.ok(localCompose.includes("MTX_RTSPTRANSPORTS=tcp"))
+assert.ok(!prodCompose.includes("MTX_PROTOCOLS=tcp"))
+assert.ok(prodCompose.includes("MTX_RTSPTRANSPORTS=tcp"))
+assert.ok(prodCompose.includes("Authorization: Basic YWRtaW46YWRtaW5wYXNz"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(!devCompose.includes("pull_policy: never"))
