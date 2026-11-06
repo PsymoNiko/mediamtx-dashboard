@@ -99,6 +99,7 @@ services:
       MEDIAMTX_API_URL: ${MEDIAMTX_API_URL:-http://publisher:9997}
       NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL:-/api/mediamtx}
       NEXT_PUBLIC_MEDIAMTX_HLS_URL: ${NEXT_PUBLIC_MEDIAMTX_HLS_URL:-http://localhost/hls}
+      NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS:-}
     networks:
       - mediamtx_network
 

@@ -86,3 +86,22 @@ const recoveredResponse = await fetchUpstreamMediaMtxWithRetry(
 )
 assert.equal(attempts, 3)
 assert.equal(recoveredResponse.status, 200)
+
+let postAttempts = 0
+await assert.rejects(
+  () =>
+    fetchUpstreamMediaMtxWithRetry(
+      "http://publisher:9997/v3/config/paths/add/live",
+      { method: "POST" },
+      {
+        maxAttempts: 4,
+        retryDelayMs: 1,
+        fetchImpl: async () => {
+          postAttempts += 1
+          throw new TypeError("fetch failed")
+        },
+      },
+    ),
+  /fetch failed/,
+)
+assert.equal(postAttempts, 1)
