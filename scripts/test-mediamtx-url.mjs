@@ -4,13 +4,40 @@ import fs from "node:fs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
+  fetchUpstreamMediaMtxWithRetry,
   normalizeMediaMtxApiBaseUrl,
+  normalizeMediaMtxServerApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/"), "http://localhost:9997")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3"), "http://localhost")
 assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config"), "http://localhost")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config/global/get"), "http://localhost")
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "/api/mediamtx",
+    serverApiUrl: undefined,
+    legacyServerApiUrl: undefined,
+  }),
+  "http://localhost:9997",
+)
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "/api/mediamtx",
+    serverApiUrl: "http://publisher:9997/v3/config/global/get",
+    legacyServerApiUrl: undefined,
+  }),
+  "http://publisher:9997",
+)
+assert.equal(
+  normalizeMediaMtxServerApiBaseUrl({
+    publicApiUrl: "http://browser.example/v3/config",
+    serverApiUrl: undefined,
+    legacyServerApiUrl: undefined,
+  }),
+  "http://browser.example",
+)
 
 assert.equal(
   buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx"),
@@ -23,11 +50,58 @@ assert.equal(
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const defaultCompose = fs.readFileSync("docker-compose.yml", "utf8")
+const localCompose = fs.readFileSync("docker-compose.local.yml", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
 const devCompose = fs.readFileSync("docker-compose.dev.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(!defaultCompose.includes("env_file:"))
+assert.ok(defaultCompose.includes("MEDIAMTX_API_URL: ${MEDIAMTX_API_URL:-http://publisher:9997}"))
+assert.ok(defaultCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL: ${NEXT_PUBLIC_MEDIAMTX_API_URL:-/api/mediamtx}"))
+assert.ok(!localCompose.includes("MTX_PROTOCOLS=tcp"))
+assert.ok(localCompose.includes("MTX_RTSPTRANSPORTS=tcp"))
+assert.ok(!prodCompose.includes("MTX_PROTOCOLS=tcp"))
+assert.ok(prodCompose.includes("MTX_RTSPTRANSPORTS=tcp"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(!devCompose.includes("pull_policy: never"))
 assert.ok(devCompose.includes("pull_policy: missing"))
+
+let attempts = 0
+const recoveredResponse = await fetchUpstreamMediaMtxWithRetry(
+  "http://publisher:9997/v3/config/global/get",
+  { method: "GET" },
+  {
+    maxAttempts: 4,
+    retryDelayMs: 1,
+    fetchImpl: async () => {
+      attempts += 1
+      if (attempts < 3) {
+        throw new TypeError("fetch failed: ECONNREFUSED")
+      }
+      return new Response(JSON.stringify({ ok: true }), { status: 200 })
+    },
+  },
+)
+assert.equal(attempts, 3)
+assert.equal(recoveredResponse.status, 200)
+
+let postAttempts = 0
+await assert.rejects(
+  () =>
+    fetchUpstreamMediaMtxWithRetry(
+      "http://publisher:9997/v3/config/paths/add/live",
+      { method: "POST" },
+      {
+        maxAttempts: 4,
+        retryDelayMs: 1,
+        fetchImpl: async () => {
+          postAttempts += 1
+          throw new TypeError("fetch failed")
+        },
+      },
+    ),
+  /fetch failed/,
+)
+assert.equal(postAttempts, 1)

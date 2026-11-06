@@ -1,4 +1,7 @@
-const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
+import {
+  fetchUpstreamMediaMtxWithRetry,
+  normalizeMediaMtxServerApiBaseUrl,
+} from "@/lib/mediamtx-url.mjs"
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -13,16 +16,9 @@ const HOP_BY_HOP_HEADERS = new Set([
   "upgrade",
 ])
 
-function normalizeUpstreamApiUrl() {
-  const configuredUrl =
-    process.env.MEDIAMTX_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
-    DEFAULT_UPSTREAM_API_URL
-
-  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
-}
-
+/**
+ * Copies allowed request headers (`accept`, `authorization`, `content-type`) for the upstream MediaMTX call.
+ */
 function proxyHeaders(request: Request) {
   const headers = new Headers()
 
@@ -36,6 +32,9 @@ function proxyHeaders(request: Request) {
   return headers
 }
 
+/**
+ * Strips hop-by-hop HTTP headers from the upstream MediaMTX response before returning it to the client.
+ */
 function responseHeaders(headers: Headers) {
   const responseHeaders = new Headers(headers)
 
@@ -46,14 +45,17 @@ function responseHeaders(headers: Headers) {
   return responseHeaders
 }
 
+/**
+ * Forwards an incoming `/api/mediamtx/[...path]` request to the configured upstream MediaMTX Control API.
+ */
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params
-  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeUpstreamApiUrl()}/`)
+  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeMediaMtxServerApiBaseUrl()}/`)
   const incomingUrl = new URL(request.url)
   upstreamUrl.search = incomingUrl.search
 
   const method = request.method.toUpperCase()
-  const response = await fetch(upstreamUrl, {
+  const response = await fetchUpstreamMediaMtxWithRetry(upstreamUrl, {
     method,
     headers: proxyHeaders(request),
     body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
