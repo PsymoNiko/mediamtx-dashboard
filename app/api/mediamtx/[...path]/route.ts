@@ -13,6 +13,9 @@ const HOP_BY_HOP_HEADERS = new Set([
   "upgrade",
 ])
 
+/**
+ * Copies allowed request headers (`accept`, `authorization`, `content-type`) for the upstream MediaMTX call.
+ */
 function proxyHeaders(request: Request) {
   const headers = new Headers()
 
@@ -26,6 +29,9 @@ function proxyHeaders(request: Request) {
   return headers
 }
 
+/**
+ * Strips hop-by-hop HTTP headers from the upstream MediaMTX response before returning it to the client.
+ */
 function responseHeaders(headers: Headers) {
   const responseHeaders = new Headers(headers)
 
@@ -36,6 +42,9 @@ function responseHeaders(headers: Headers) {
   return responseHeaders
 }
 
+/**
+ * Forwards an incoming `/api/mediamtx/[...path]` request to the configured upstream MediaMTX Control API.
+ */
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params
   const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeMediaMtxServerApiBaseUrl()}/`)
