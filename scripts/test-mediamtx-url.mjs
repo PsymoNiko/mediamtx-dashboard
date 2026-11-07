@@ -5,6 +5,7 @@ import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
   normalizeMediaMtxApiBaseUrl,
+  normalizeServerMediaMtxApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
 
 assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
@@ -31,3 +32,20 @@ assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:99
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(!devCompose.includes("pull_policy: never"))
 assert.ok(devCompose.includes("pull_policy: missing"))
+
+assert.equal(
+  normalizeMediaMtxApiBaseUrl("http://localhost:9997/v3/config/global/get"),
+  "http://localhost:9997",
+)
+assert.equal(
+  buildMediaMtxApiUrl("/v3/config/global/get", undefined, "/dashboard"),
+  "/dashboard/api/mediamtx/v3/config/global/get",
+)
+assert.equal(
+  normalizeServerMediaMtxApiBaseUrl(undefined, "/api/mediamtx"),
+  "http://localhost:9997",
+)
+assert.equal(
+  normalizeServerMediaMtxApiBaseUrl("http://publisher:9997/v3/config", "/api/mediamtx"),
+  "http://publisher:9997",
+)
