@@ -58,6 +58,21 @@ function responseHeaders(headers: Headers) {
 }
 
 /**
+ * Build a 503 Service Unavailable JSON response when the MediaMTX upstream API is unreachable.
+ * @returns {Response} Explicit 503 response for transient upstream startup windows.
+ */
+function upstreamUnavailableResponse() {
+  return new Response(
+    JSON.stringify({ error: "MediaMTX upstream API is temporarily unreachable" }),
+    {
+      status: 503,
+      statusText: "Service Unavailable",
+      headers: { "content-type": "application/json" },
+    },
+  )
+}
+
+/**
  * Proxy an incoming HTTP request to the upstream MediaMTX v3 control API.
  * @param {Request} request - Incoming HTTP request from dashboard client.
  * @param {{ params: Promise<{ path?: string[] }> }} context - Next.js dynamic catch-all route params.
@@ -70,18 +85,24 @@ async function proxyMediaMtxRequest(request: Request, context: { params: Promise
   upstreamUrl.search = incomingUrl.search
 
   const method = request.method.toUpperCase()
-  const response = await fetch(upstreamUrl, {
-    method,
-    headers: proxyHeaders(request),
-    body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
-    cache: "no-store",
-  })
+  const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer()
 
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: responseHeaders(response.headers),
-  })
+  try {
+    const response = await fetch(upstreamUrl, {
+      method,
+      headers: proxyHeaders(request),
+      body,
+      cache: "no-store",
+    })
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders(response.headers),
+    })
+  } catch {
+    return upstreamUnavailableResponse()
+  }
 }
 
 export const dynamic = "force-dynamic"
