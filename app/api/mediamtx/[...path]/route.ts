@@ -13,6 +13,10 @@ const HOP_BY_HOP_HEADERS = new Set([
   "upgrade",
 ])
 
+/**
+ * Resolve the upstream MediaMTX control API base URL from server environment variables.
+ * @returns {string} Normalized upstream HTTP base URL.
+ */
 function normalizeUpstreamApiUrl() {
   return normalizeServerMediaMtxApiBaseUrl(
     process.env.MEDIAMTX_API_URL || process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL,
@@ -20,6 +24,11 @@ function normalizeUpstreamApiUrl() {
   )
 }
 
+/**
+ * Extract safe authentication and content negotiation headers from the incoming client request.
+ * @param {Request} request - Incoming Next.js route handler request.
+ * @returns {Headers} Sanitized headers to forward to the MediaMTX server.
+ */
 function proxyHeaders(request: Request) {
   const headers = new Headers()
 
@@ -33,16 +42,27 @@ function proxyHeaders(request: Request) {
   return headers
 }
 
+/**
+ * Strip RFC 2616 hop-by-hop transport headers from the upstream MediaMTX response.
+ * @param {Headers} headers - Raw upstream response headers.
+ * @returns {Headers} Filtered response headers safe for browser forwarding.
+ */
 function responseHeaders(headers: Headers) {
-  const responseHeaders = new Headers(headers)
+  const filteredHeaders = new Headers(headers)
 
   for (const header of HOP_BY_HOP_HEADERS) {
-    responseHeaders.delete(header)
+    filteredHeaders.delete(header)
   }
 
-  return responseHeaders
+  return filteredHeaders
 }
 
+/**
+ * Proxy an incoming HTTP request to the upstream MediaMTX v3 control API.
+ * @param {Request} request - Incoming HTTP request from dashboard client.
+ * @param {{ params: Promise<{ path?: string[] }> }} context - Next.js dynamic catch-all route params.
+ * @returns {Promise<Response>} Upstream MediaMTX response with hop-by-hop headers removed.
+ */
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params
   const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeUpstreamApiUrl()}/`)
@@ -66,22 +86,37 @@ async function proxyMediaMtxRequest(request: Request, context: { params: Promise
 
 export const dynamic = "force-dynamic"
 
+/**
+ * Forward HTTP GET requests to the upstream MediaMTX API.
+ */
 export async function GET(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   return proxyMediaMtxRequest(request, context)
 }
 
+/**
+ * Forward HTTP POST requests to the upstream MediaMTX API.
+ */
 export async function POST(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   return proxyMediaMtxRequest(request, context)
 }
 
+/**
+ * Forward HTTP PUT requests to the upstream MediaMTX API.
+ */
 export async function PUT(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   return proxyMediaMtxRequest(request, context)
 }
 
+/**
+ * Forward HTTP PATCH requests to the upstream MediaMTX API.
+ */
 export async function PATCH(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   return proxyMediaMtxRequest(request, context)
 }
 
+/**
+ * Forward HTTP DELETE requests to the upstream MediaMTX API.
+ */
 export async function DELETE(request: Request, context: { params: Promise<{ path?: string[] }> }) {
   return proxyMediaMtxRequest(request, context)
 }
