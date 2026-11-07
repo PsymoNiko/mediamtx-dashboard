@@ -1,4 +1,4 @@
-const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
+import { normalizeServerMediaMtxApiBaseUrl } from "@/lib/mediamtx-url.mjs"
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -14,13 +14,10 @@ const HOP_BY_HOP_HEADERS = new Set([
 ])
 
 function normalizeUpstreamApiUrl() {
-  const configuredUrl =
-    process.env.MEDIAMTX_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
-    DEFAULT_UPSTREAM_API_URL
-
-  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
+  return normalizeServerMediaMtxApiBaseUrl(
+    process.env.MEDIAMTX_API_URL || process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL,
+    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL,
+  )
 }
 
 function proxyHeaders(request: Request) {
@@ -67,8 +64,24 @@ async function proxyMediaMtxRequest(request: Request, context: { params: Promise
   })
 }
 
-export const GET = proxyMediaMtxRequest
-export const POST = proxyMediaMtxRequest
-export const PUT = proxyMediaMtxRequest
-export const PATCH = proxyMediaMtxRequest
-export const DELETE = proxyMediaMtxRequest
+export const dynamic = "force-dynamic"
+
+export async function GET(request: Request, context: { params: Promise<{ path?: string[] }> }) {
+  return proxyMediaMtxRequest(request, context)
+}
+
+export async function POST(request: Request, context: { params: Promise<{ path?: string[] }> }) {
+  return proxyMediaMtxRequest(request, context)
+}
+
+export async function PUT(request: Request, context: { params: Promise<{ path?: string[] }> }) {
+  return proxyMediaMtxRequest(request, context)
+}
+
+export async function PATCH(request: Request, context: { params: Promise<{ path?: string[] }> }) {
+  return proxyMediaMtxRequest(request, context)
+}
+
+export async function DELETE(request: Request, context: { params: Promise<{ path?: string[] }> }) {
+  return proxyMediaMtxRequest(request, context)
+}
