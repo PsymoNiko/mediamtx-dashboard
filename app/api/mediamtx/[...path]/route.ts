@@ -20,7 +20,7 @@ function normalizeUpstreamApiUrl() {
     process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
     DEFAULT_UPSTREAM_API_URL
 
-  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
+  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config\/global\/get$/i, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
 }
 
 function proxyHeaders(request: Request) {
