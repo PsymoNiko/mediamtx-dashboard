@@ -4,30 +4,61 @@ import fs from "node:fs"
 import {
   buildMediaMtxApiUrl,
   buildMediaMtxHlsUrl,
+  normalizeBasePath,
   normalizeMediaMtxApiBaseUrl,
+  normalizeMediaMtxUpstreamApiBaseUrl,
 } from "../lib/mediamtx-url.mjs"
 
-assert.equal(normalizeMediaMtxApiBaseUrl(undefined), "/api/mediamtx")
-assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/"), "http://localhost:9997")
-assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3"), "http://localhost")
-assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config"), "http://localhost")
+assert.equal(normalizeBasePath(undefined), "")
+assert.equal(normalizeBasePath("/dashboard/"), "/dashboard")
+assert.equal(normalizeMediaMtxApiBaseUrl(undefined, ""), "/api/mediamtx")
+assert.equal(normalizeMediaMtxApiBaseUrl(undefined, "/dashboard"), "/dashboard/api/mediamtx")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/", ""), "http://localhost:9997")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3", ""), "http://localhost")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost/v3/config", ""), "http://localhost")
+assert.equal(normalizeMediaMtxApiBaseUrl("http://localhost:9997/v3/config/global/get", ""), "http://localhost:9997")
 
 assert.equal(
-  buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx"),
+  normalizeMediaMtxUpstreamApiBaseUrl({ NEXT_PUBLIC_MEDIAMTX_API_URL: "/api/mediamtx" }),
+  "http://localhost:9997",
+)
+assert.equal(
+  normalizeMediaMtxUpstreamApiBaseUrl({
+    MEDIAMTX_API_URL: "http://publisher:9997/v3/config/global/get",
+    NEXT_PUBLIC_MEDIAMTX_API_URL: "/api/mediamtx",
+  }),
+  "http://publisher:9997",
+)
+
+assert.equal(
+  buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx", ""),
   "/api/mediamtx/v3/config/global/get",
 )
 assert.equal(
-  buildMediaMtxApiUrl("/v3/config/global/get", "http://localhost/v3/config"),
+  buildMediaMtxApiUrl("/v3/config/global/get", "/api/mediamtx", "/dashboard"),
+  "/dashboard/api/mediamtx/v3/config/global/get",
+)
+assert.equal(
+  buildMediaMtxApiUrl("/v3/config/global/get", "http://localhost/v3/config", ""),
   "http://localhost/v3/config/global/get",
 )
 assert.equal(buildMediaMtxHlsUrl("mystream", "http://localhost/hls/"), "http://localhost/hls/mystream/index.m3u8")
+assert.equal(
+  buildMediaMtxHlsUrl("cam 1/live#feed", "http://localhost/hls"),
+  "http://localhost/hls/cam%201/live%23feed/index.m3u8",
+)
 
 const dockerfile = fs.readFileSync("Dockerfile", "utf8")
+const defaultCompose = fs.readFileSync("docker-compose.yml", "utf8")
 const prodCompose = fs.readFileSync("docker-compose.prod.yml", "utf8")
 const devCompose = fs.readFileSync("docker-compose.dev.yml", "utf8")
 
 assert.ok(!dockerfile.includes('NEXT_PUBLIC_MEDIAMTX_API_URL="http://localhost:80/v3/config"'))
+assert.ok(!defaultCompose.includes("- ./.env"))
+assert.ok(!devCompose.includes("- ./.env"))
+assert.ok(devCompose.includes("MEDIAMTX_API_URL: ${MEDIAMTX_API_URL:-http://publisher:9997}"))
 assert.ok(!prodCompose.includes("NEXT_PUBLIC_MEDIAMTX_API_URL=http://mediamtx:9997"))
 assert.ok(prodCompose.includes("MEDIAMTX_API_URL=http://mediamtx:9997"))
+assert.ok(prodCompose.includes("Authorization: Basic YWRtaW46YWRtaW5wYXNz"))
 assert.ok(!devCompose.includes("pull_policy: never"))
 assert.ok(devCompose.includes("pull_policy: missing"))

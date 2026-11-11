@@ -1,4 +1,4 @@
-const DEFAULT_UPSTREAM_API_URL = "http://localhost:9997"
+import { normalizeMediaMtxUpstreamApiBaseUrl } from "@/lib/mediamtx-url.mjs"
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -13,15 +13,9 @@ const HOP_BY_HOP_HEADERS = new Set([
   "upgrade",
 ])
 
-function normalizeUpstreamApiUrl() {
-  const configuredUrl =
-    process.env.MEDIAMTX_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_SERVER_API_URL ||
-    process.env.NEXT_PUBLIC_MEDIAMTX_API_URL ||
-    DEFAULT_UPSTREAM_API_URL
-
-  return configuredUrl.trim().replace(/\/+$/, "").replace(/\/v3\/config$/i, "").replace(/\/v3$/i, "")
-}
+const ALLOWED_METHODS = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS"
+const ALLOWED_HEADERS = "Accept, Authorization, Content-Type"
+const UPSTREAM_TIMEOUT_MS = 10_000
 
 function proxyHeaders(request: Request) {
   const headers = new Headers()
@@ -36,39 +30,72 @@ function proxyHeaders(request: Request) {
   return headers
 }
 
-function responseHeaders(headers: Headers) {
-  const responseHeaders = new Headers(headers)
+function responseHeaders(headers?: Headers) {
+  const out = new Headers(headers)
 
   for (const header of HOP_BY_HOP_HEADERS) {
-    responseHeaders.delete(header)
+    out.delete(header)
   }
 
-  return responseHeaders
+  out.set("Access-Control-Allow-Origin", "*")
+  out.set("Access-Control-Allow-Methods", ALLOWED_METHODS)
+  out.set("Access-Control-Allow-Headers", ALLOWED_HEADERS)
+  return out
 }
 
 async function proxyMediaMtxRequest(request: Request, context: { params: Promise<{ path?: string[] }> }) {
+  const method = request.method.toUpperCase()
+  if (method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: responseHeaders(),
+    })
+  }
+
   const { path = [] } = await context.params
-  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${normalizeUpstreamApiUrl()}/`)
+  const upstreamBase = normalizeMediaMtxUpstreamApiBaseUrl(process.env)
+  const upstreamUrl = new URL(path.map(encodeURIComponent).join("/"), `${upstreamBase}/`)
   const incomingUrl = new URL(request.url)
   upstreamUrl.search = incomingUrl.search
 
-  const method = request.method.toUpperCase()
-  const response = await fetch(upstreamUrl, {
-    method,
-    headers: proxyHeaders(request),
-    body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
-    cache: "no-store",
-  })
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS)
 
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: responseHeaders(response.headers),
-  })
+  try {
+    const response = await fetch(upstreamUrl, {
+      method,
+      headers: proxyHeaders(request),
+      body: method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer(),
+      cache: "no-store",
+      signal: controller.signal,
+    })
+
+    return new Response(method === "HEAD" ? null : response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders(response.headers),
+    })
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === "AbortError"
+    return Response.json(
+      {
+        error: isTimeout ? "MediaMTX upstream request timed out" : "Failed to reach MediaMTX upstream API",
+        upstream: upstreamBase,
+      },
+      {
+        status: isTimeout ? 504 : 502,
+        headers: responseHeaders(),
+      },
+    )
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 export const GET = proxyMediaMtxRequest
+export const HEAD = proxyMediaMtxRequest
 export const POST = proxyMediaMtxRequest
 export const PUT = proxyMediaMtxRequest
 export const PATCH = proxyMediaMtxRequest
 export const DELETE = proxyMediaMtxRequest
+export const OPTIONS = proxyMediaMtxRequest
